@@ -1,0 +1,64 @@
+[project]
+name = "kehora-backend"
+version = "0.0.0"
+description = "Kehora backend uv workspace root"
+requires-python = ">=3.12,<3.13"
+dependencies = ["kehora-common"]
+
+[dependency-groups]
+dev = [
+    "ruff==0.17.3",
+    "mypy==2.4.1",
+    "pytest==9.2.0",
+    "pytest-asyncio==1.4.1",
+    "pytest-cov==7.1.0",
+    "datamodel-code-generator==0.87.0",
+    "types-pyyaml",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["common"]
+
+[tool.uv.sources]
+kehora-common = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["schemas/kehora_schemas/generated"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "ASYNC", "S", "RUF", "TID"]
+ignore = ["S101"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["kehora_*"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S108"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+exclude = ["^tests/fixtures/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+addopts = "-ra --strict-markers"
+markers = [
+    "db: needs the Postgres from docker compose",
+    "redis: needs the Redis from docker compose",
+    "docker: needs a Docker engine",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["kehora_common"]
+omit = ["*/alembic/*", "*/generated/*"]
