@@ -15,7 +15,7 @@ from starlette.concurrency import run_in_threadpool
 
 from kehora_api.auth.clerk import ClerkVerifier
 from kehora_api.deps import AppState
-from kehora_api.routers import files, me, projects, webhooks
+from kehora_api.routers import admin, files, me, projects, webhooks
 from kehora_common.logging import configure_logging, get_logger
 from kehora_common.settings import Environment, Settings, get_settings
 from kehora_common.storage import Storage
@@ -90,5 +90,6 @@ def create_app(settings: Settings | None = None, http: httpx.AsyncClient | None 
     v1.include_router(files.router)
     v1.include_router(projects.router)
     v1.include_router(webhooks.router)
+    v1.include_router(admin.router)
     app.include_router(v1)
     return app
