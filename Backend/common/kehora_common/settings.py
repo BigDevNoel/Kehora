@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     clerk_secret_key: SecretStr | None = None
     clerk_webhook_signing_secret: SecretStr | None = None
     clerk_authorized_parties: list[str] = Field(default_factory=list)
+    clerk_api_url: str = "https://api.clerk.com/v1"
 
     anthropic_api_key: SecretStr | None = None
     openai_api_key: SecretStr | None = None

@@ -3,7 +3,7 @@ name = "kehora-backend"
 version = "0.0.0"
 description = "Kehora backend uv workspace root"
 requires-python = ">=3.12,<3.13"
-dependencies = ["kehora-common", "kehora-schemas", "kehora-db"]
+dependencies = ["kehora-common", "kehora-schemas", "kehora-db", "kehora-api"]
 
 [dependency-groups]
 dev = [
@@ -24,12 +24,13 @@ dev = [
 package = false
 
 [tool.uv.workspace]
-members = ["common", "schemas", "db"]
+members = ["common", "schemas", "db", "api"]
 
 [tool.uv.sources]
 kehora-common = { workspace = true }
 kehora-schemas = { workspace = true }
 kehora-db = { workspace = true }
+kehora-api = { workspace = true }
 
 [tool.ruff]
 line-length = 100
@@ -68,9 +69,9 @@ markers = [
 
 [tool.coverage.run]
 branch = true
-source = ["kehora_common", "kehora_schemas", "kehora_db"]
+source = ["kehora_common", "kehora_schemas", "kehora_db", "kehora_api"]
 omit = ["*/alembic/*", "*/generated/*"]
 
 [[tool.mypy.overrides]]
-module = ["alembic.*", "botocore.*", "boto3.*"]
+module = ["alembic.*", "botocore.*", "boto3.*", "arq.*"]
 ignore_missing_imports = true

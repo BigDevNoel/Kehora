@@ -57,7 +57,7 @@ this ADR records the direct, load-bearing choices.
 | psycopg (binary, pool) | 3.3.6 |
 | langgraph / langgraph-checkpoint-postgres | 1.2.18 / 3.2.0 |
 | arq | 0.28.0 |
-| redis | 8.1.0 |
+| redis | 5.3.1 (arq 0.28 requires redis<6) |
 | anthropic / openai | 2.3.0 / 3.41.0 (imported only in `Backend/llm/`) |
 | boto3 | 1.43.122 |
 | pyjwt[crypto] | 2.15.1 |
