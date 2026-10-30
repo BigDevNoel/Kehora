@@ -1,0 +1,19 @@
+[project]
+name = "kehora-llm"
+version = "0.0.0"
+description = "Model gateway: provider-agnostic interface, routing, fallback and cost logging"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "kehora-common",
+    "pydantic==2.14.2",
+    "pyyaml==6.0.3",
+    "anthropic==2.3.0",
+    "openai==3.41.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["kehora_llm"]
