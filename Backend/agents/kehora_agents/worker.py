@@ -6,6 +6,7 @@ Jobs:
   lease (their worker died) and gate-paused runs whose decision was stored but not applied.
 """
 
+import asyncio
 import contextlib
 import os
 import uuid
@@ -30,6 +31,7 @@ from kehora_common.storage import Storage
 from kehora_db.enums import ApprovalStatus, RunStatus
 from kehora_db.models import AgentRun, Approval
 from kehora_db.session import make_engine, make_sessionmaker
+from kehora_engines_runner.local_docker import LocalDockerSandbox
 from kehora_engines_runner.runner import build_sandbox
 from kehora_llm.gateway import build_gateway
 
@@ -68,6 +70,9 @@ async def startup(ctx: dict[str, Any]) -> None:
         sandbox=build_sandbox(settings),
         storage=storage,
     )
+    if isinstance(svc.sandbox, LocalDockerSandbox):
+        reaped = await asyncio.to_thread(svc.sandbox.reap_stale)
+        log.info("sandbox_reaped", containers=reaped)
     stack = contextlib.AsyncExitStack()
     saver = await stack.enter_async_context(open_checkpointer(settings.database_url))
     ctx.update(svc=svc, graph=build_graph(svc, saver), stack=stack, engine=engine)
@@ -150,5 +155,6 @@ class WorkerSettings:
     on_shutdown = shutdown
     redis_settings = _redis_settings()
     max_jobs = 10
+    health_check_interval = 10
     job_timeout = 900
     keep_result = 60

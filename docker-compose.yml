@@ -1,11 +1,35 @@
 name: kehora
 
-x-backend-env: &backend-env
+# Containers reach each other by service name; the browser and host-run tools use localhost
+# ports. Secrets come from .env (git-ignored; see .env.example).
+x-backend: &backend
+  build:
+    context: Backend
+    dockerfile: infra/docker/backend/Dockerfile
+  image: kehora/backend:dev
   env_file: .env
-  environment:
+  environment: &backend-env
     DATABASE_URL: postgresql+psycopg://kehora:kehora@postgres:5432/kehora
     REDIS_URL: redis://redis:6379/0
     S3_ENDPOINT_URL: http://s3:8333
+    # `make e2e` sets LLM_ROUTING_PROFILE=test for a deterministic offline run.
+    LLM_ROUTING_PROFILE: ${LLM_ROUTING_PROFILE:-default}
+    # `make e2e` slows the echo engine so the restart test can kill the worker mid-node.
+    ECHO_DELAY_S: ${ECHO_DELAY_S:-0}
+  volumes:
+    # Live code; the virtualenv lives at /opt/venv inside the image.
+    - ./Backend:/app
+  depends_on:
+    postgres: { condition: service_healthy }
+    redis: { condition: service_healthy }
+    s3: { condition: service_healthy }
+
+x-frontend: &frontend
+  build:
+    context: Frontend
+    dockerfile: ../Backend/infra/docker/frontend/Dockerfile
+  image: kehora/frontend:dev
+  env_file: .env
 
 services:
   postgres:
@@ -52,6 +76,68 @@ services:
     build: Backend/infra/docker/egress
     image: kehora/egress:dev
     networks: [default, sandbox]
+
+  api:
+    <<: *backend
+    command:
+      - sh
+      - -c
+      - >-
+        cd db && alembic upgrade head && cd .. &&
+        exec uvicorn kehora_api.main:create_app --factory --host 0.0.0.0 --port 8000
+        --reload --reload-dir /app
+    ports: ["8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+  worker:
+    <<: *backend
+    command: ["arq", "kehora_agents.worker.WorkerSettings"]
+    # Dev only: the local sandbox drives the host Docker engine (ADR-0008).
+    user: root
+    environment:
+      <<: *backend-env
+      SANDBOX_PROVIDER: local_docker
+      SANDBOX_EGRESS_PROXY: http://egress:8888
+    volumes:
+      - ./Backend:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      api: { condition: service_healthy }
+      egress: { condition: service_started }
+    healthcheck:
+      test: ["CMD", "arq", "--check", "kehora_agents.worker.WorkerSettings"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+
+  studio:
+    <<: *frontend
+    command: ["pnpm", "--filter", "@kehora/studio", "dev"]
+    ports: ["5173:5173"]
+    depends_on:
+      api: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5173').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 3s
+      timeout: 3s
+      retries: 60
+
+  admin:
+    <<: *frontend
+    command: ["pnpm", "--filter", "@kehora/admin", "dev"]
+    ports: ["5174:5174"]
+    depends_on:
+      api: { condition: service_healthy }
+
+  site:
+    <<: *frontend
+    command: ["pnpm", "--filter", "@kehora/site", "dev"]
+    ports: ["4321:4321"]
 
 networks:
   sandbox:

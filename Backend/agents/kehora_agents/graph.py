@@ -140,7 +140,10 @@ def build_graph(svc: Services, checkpointer: Any) -> CompiledStateGraph[Any, Any
     async def engine(state: BuildState) -> dict[str, Any]:
         assert state.spec is not None and state.version_id is not None
         echo = EchoEngine()
-        inp = EchoInput(message=f"{state.spec.title}\n\n{state.spec.summary}")
+        inp = EchoInput(
+            message=f"{state.spec.title}\n\n{state.spec.summary}",
+            delay_s=svc.settings.echo_delay_s,
+        )
         result = await run_engine(svc.sandbox, echo, inp)
         key = f"projects/{state.project_id}/versions/{state.version_id}/echo/echo.txt"
         stored = await asyncio.to_thread(

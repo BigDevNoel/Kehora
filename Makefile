@@ -9,12 +9,26 @@ GENERATED := Backend/schemas/kehora_schemas/generated Backend/api/openapi.json \
 	Frontend/packages/types/src/generated Frontend/packages/api-client/src/generated
 gen_sum = find $(GENERATED) -type f -not -path '*__pycache__*' | sort | xargs sha256sum | sha256sum
 
-.PHONY: help check check-backend check-frontend services migrate codegen codegen-check
+.PHONY: help dev down logs check check-backend check-frontend e2e services migrate codegen codegen-check evals
 
 help:  ## List targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*## /\t/'
 
-check: codegen-check check-backend check-frontend  ## Lint + type check + tests (run before every commit)
+dev:  ## Build and start everything: data services, api, worker, studio, admin, site
+	$(COMPOSE) up -d --build --wait
+	@echo ""
+	@echo "  studio  http://localhost:5173"
+	@echo "  admin   http://localhost:5174"
+	@echo "  site    http://localhost:4321"
+	@echo "  api     http://localhost:8000/docs"
+
+down:  ## Stop everything (keeps data volumes)
+	$(COMPOSE) down
+
+logs:  ## Follow api and worker logs
+	$(COMPOSE) logs -f api worker
+
+check: codegen-check check-backend check-frontend e2e  ## Lint + types + unit/integration + Playwright (run before every commit)
 
 check-backend: services  ## Backend lint, types, unit and integration tests
 	$(BE) uv sync --frozen -q
@@ -48,3 +62,11 @@ codegen-check:  ## Fail if generated code is stale (regenerates, compares checks
 	if [ "$$before" != "$$after" ]; then \
 		echo "Generated code was stale and has been regenerated; review and commit it."; exit 1; \
 	fi; echo "codegen: up to date"
+
+e2e:  ## Gate flows against the compose stack (offline LLM): restart system test + Playwright
+	LLM_ROUTING_PROFILE=test ECHO_DELAY_S=4 $(COMPOSE) up -d --build --wait
+	$(BE) uv run pytest -q -m system tests/system
+	$(FE) pnpm e2e
+
+evals:  ## Agent eval suites (Phase 1 adds the object prompts)
+	$(BE) uv run python -m evals

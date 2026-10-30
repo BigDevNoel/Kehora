@@ -15,6 +15,7 @@ import io
 import tarfile
 import time
 import uuid
+from datetime import UTC, datetime
 from typing import Any
 
 import docker
@@ -46,6 +47,12 @@ def _input_tar(files: dict[str, bytes]) -> bytes:
             info.uid = info.gid = NOBODY
             tar.addfile(info, io.BytesIO(data))
     return buf.getvalue()
+
+
+def _parse_docker_time(value: str) -> float:
+    # Docker timestamps carry nanoseconds, e.g. 2026-10-30T07:41:03.123456789Z
+    head = value.split(".")[0].rstrip("Z")
+    return datetime.strptime(head, "%Y-%m-%dT%H:%M:%S").replace(tzinfo=UTC).timestamp()
 
 
 def _tail(log: bytes) -> str:
@@ -89,6 +96,24 @@ class LocalDockerSandbox:
         if self._client is None:
             self._client = docker.from_env()
         return self._client
+
+    def reap_stale(self, max_age_s: int = 900) -> int:
+        """Remove sandbox containers and volumes left by a worker that died mid-job: everything
+        not running, and anything running longer than the maximum job time."""
+        removed = 0
+        now = time.time()
+        for c in self.client.containers.list(all=True, filters={"label": "kehora.sandbox"}):
+            created = c.attrs.get("Created", "")
+            age = now - _parse_docker_time(created) if created else max_age_s + 1
+            if c.status != "running" or age > max_age_s:
+                c.remove(force=True)
+                removed += 1
+        for v in self.client.volumes.list(filters={"label": "kehora.sandbox"}):
+            try:
+                v.remove()
+            except DockerException:
+                pass  # still in use by a running job
+        return removed
 
     async def run(self, job: SandboxJob) -> SandboxResult:
         check_no_secrets(job)

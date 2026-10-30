@@ -13,6 +13,7 @@ IMAGE = "busybox:1.37.0"
 
 class EchoInput(BaseModel):
     message: str = Field(min_length=1, max_length=10_000)
+    delay_s: int = Field(default=0, ge=0, le=30, description="Test knob: sleep before echoing.")
 
 
 class EchoOutput(BaseModel):
@@ -27,7 +28,11 @@ class EchoEngine(Engine[EchoInput, EchoOutput]):
     def build_job(self, inp: EchoInput) -> SandboxJob:
         return SandboxJob(
             image=IMAGE,
-            command=["sh", "-c", "cp /work/in/message.txt /work/out/echo.txt && echo done"],
+            command=[
+                "sh",
+                "-c",
+                f"sleep {inp.delay_s} && cp /work/in/message.txt /work/out/echo.txt && echo done",
+            ],
             files={"message.txt": inp.message.encode()},
             limits=SandboxLimits(cpus=0.5, memory_mb=64, pids=32, timeout_s=60),
         )

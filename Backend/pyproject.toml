@@ -66,12 +66,13 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-markers -m 'not system'"
 markers = [
     "db: needs the Postgres from docker compose",
     "redis: needs the Redis from docker compose",
     "s3: needs the local S3 from docker compose",
     "docker: needs a Docker engine",
+    "system: runs against the full compose stack (make e2e)",
 ]
 
 [tool.coverage.run]

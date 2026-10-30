@@ -47,6 +47,8 @@ class Settings(BaseSettings):
 
     sandbox_provider: str = Field(default="local_docker", pattern="^(local_docker|e2b)$")
     sandbox_egress_proxy: str | None = None
+    # Test knob for the restart gate: makes the echo engine slow enough to kill mid-node.
+    echo_delay_s: int = Field(default=0, ge=0, le=30)
     e2b_api_key: SecretStr | None = None
 
     sentry_dsn: str | None = None
