@@ -19,7 +19,7 @@ this ADR records the direct, load-bearing choices.
 | pnpm | 9.12 |
 | Python | 3.12 (installed by uv) |
 | uv | 0.12 |
-| PostgreSQL | 16, image `postgis/postgis:16-3.5` + `postgresql-16-pgvector` |
+| PostgreSQL | 16, image `postgis/postgis:16-3.6` (Debian trixie) + `postgresql-16-pgvector` 0.8.7 |
 | Redis | 7.4 |
 | SeaweedFS | `chrislusf/seaweedfs:4.51` (local S3, see ADR-0002) |
 

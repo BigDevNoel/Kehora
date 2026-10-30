@@ -1,0 +1,54 @@
+name: kehora
+
+x-backend-env: &backend-env
+  env_file: .env
+  environment:
+    DATABASE_URL: postgresql+psycopg://kehora:kehora@postgres:5432/kehora
+    REDIS_URL: redis://redis:6379/0
+    S3_ENDPOINT_URL: http://s3:8333
+
+services:
+  postgres:
+    build: Backend/infra/docker/postgres
+    image: kehora/postgres:16
+    environment:
+      POSTGRES_USER: kehora
+      POSTGRES_PASSWORD: kehora
+      POSTGRES_DB: kehora
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kehora -d kehora"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7.4-alpine
+    ports: ["6379:6379"]
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  s3:
+    image: chrislusf/seaweedfs:4.51
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    env_file: .env
+    ports: ["8333:8333"]
+    volumes:
+      - ./Backend/infra/docker/seaweedfs/entrypoint.sh:/entrypoint.sh:ro
+      - s3data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8333/status || exit 1"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+
+volumes:
+  pgdata:
+  redisdata:
+  s3data:
