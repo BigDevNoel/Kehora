@@ -25,8 +25,8 @@ codegen:  ## Regenerate Pydantic models, TS types and API client from Backend/sc
 codegen-check: codegen  ## Fail if generated code is out of date
 	git diff --exit-code -- Backend/schemas/kehora_schemas/generated
 
-services:  ## Start Postgres, Redis and local S3 (needed by tests)
-	$(COMPOSE) up -d --build --wait postgres redis s3
+services:  ## Start Postgres, Redis, local S3 and the sandbox egress proxy (needed by tests)
+	$(COMPOSE) up -d --build --wait postgres redis s3 egress
 
 migrate:  ## alembic upgrade head
 	$(BE) cd db && uv run alembic upgrade head

@@ -48,6 +48,17 @@ services:
       timeout: 3s
       retries: 40
 
+  egress:
+    build: Backend/infra/docker/egress
+    image: kehora/egress:dev
+    networks: [default, sandbox]
+
+networks:
+  sandbox:
+    # Sandboxes that need network join this internal network; egress is the only way out.
+    name: kehora-sandbox
+    internal: true
+
 volumes:
   pgdata:
   redisdata:

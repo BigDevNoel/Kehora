@@ -1,0 +1,13 @@
+[project]
+name = "kehora-engines"
+version = "0.0.0"
+description = "Pure making engines: typed input, sandbox job, typed output, own verifier"
+requires-python = ">=3.12,<3.13"
+dependencies = ["kehora-schemas", "pydantic==2.14.2"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["kehora_engines"]
