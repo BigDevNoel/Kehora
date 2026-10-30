@@ -23,6 +23,7 @@ from kehora_agents.graph import build_graph
 from kehora_agents.runs import execute_run, lease_key, run_lease
 from kehora_agents.services import Services
 from kehora_common.clock import utcnow
+from kehora_common.events import EXECUTE_RUN_JOB, RUN_QUEUE
 from kehora_common.logging import configure_logging, get_logger
 from kehora_common.settings import Environment, get_settings
 from kehora_common.storage import Storage
@@ -34,7 +35,7 @@ from kehora_llm.gateway import build_gateway
 
 log = get_logger(__name__)
 
-QUEUE = "kehora:runs"
+QUEUE = RUN_QUEUE
 STALE_AFTER = timedelta(seconds=15)
 
 
@@ -92,7 +93,7 @@ async def execute_run_job(ctx: dict[str, Any], run_id: str) -> str:
         return await execute_run(svc, ctx["graph"], rid)
 
 
-async def recover_runs(ctx: dict[str, Any]) -> int:
+async def recover_runs(ctx: dict[str, Any]) -> list[uuid.UUID]:
     svc: Services = ctx["svc"]
     cutoff = utcnow() - STALE_AFTER
     async with svc.sessionmaker() as session:
@@ -114,19 +115,19 @@ async def recover_runs(ctx: dict[str, Any]) -> int:
                 )
             )
         )
-    count = 0
+    recovered: list[uuid.UUID] = []
     for run_id in {*stale, *decided}:
         if await svc.redis.exists(lease_key(run_id)):
             continue
         await ctx["redis"].enqueue_job(
-            "execute_run",
+            EXECUTE_RUN_JOB,
             str(run_id),
             _job_id=f"recover:{run_id}:{uuid.uuid4().hex[:8]}",
             _queue_name=QUEUE,
         )
         log.info("run_recovered", run_id=str(run_id))
-        count += 1
-    return count
+        recovered.append(run_id)
+    return recovered
 
 
 async def recover_runs_cron(ctx: dict[str, Any]) -> None:
@@ -140,7 +141,7 @@ def _redis_settings() -> RedisSettings:
 class WorkerSettings:
     queue_name = QUEUE
     functions: ClassVar[list[Any]] = [
-        func(execute_run_job, name="execute_run", timeout=900, max_tries=100)
+        func(execute_run_job, name=EXECUTE_RUN_JOB, timeout=900, max_tries=100)
     ]
     cron_jobs: ClassVar[list[Any]] = [
         cron(recover_runs_cron, name="recover_runs", second=set(range(0, 60, 5)))

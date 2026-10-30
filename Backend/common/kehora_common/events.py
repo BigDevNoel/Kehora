@@ -7,6 +7,9 @@ XREAD from `N-0` and receive exactly the events after it (ADR-0009).
 
 import uuid
 
+RUN_QUEUE = "kehora:runs"
+EXECUTE_RUN_JOB = "execute_run"
+
 STREAM_MAXLEN = 10_000
 TERMINAL_EVENTS = frozenset({"run_finished", "run_failed"})
 

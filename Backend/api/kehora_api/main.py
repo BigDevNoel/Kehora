@@ -7,13 +7,15 @@ from contextlib import asynccontextmanager
 import httpx
 import sentry_sdk
 import structlog
+from arq import create_pool
+from arq.connections import RedisSettings
 from fastapi import APIRouter, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.concurrency import run_in_threadpool
 
 from kehora_api.auth.clerk import ClerkVerifier
 from kehora_api.deps import AppState
-from kehora_api.routers import files, me, webhooks
+from kehora_api.routers import files, me, projects, webhooks
 from kehora_common.logging import configure_logging, get_logger
 from kehora_common.settings import Environment, Settings, get_settings
 from kehora_common.storage import Storage
@@ -48,10 +50,13 @@ def create_app(settings: Settings | None = None, http: httpx.AsyncClient | None 
             storage=storage,
             verifier=verifier,
         )
+        arq = await create_pool(RedisSettings.from_dsn(settings.redis_url))
+        app.state.kehora.extras.update(arq=arq, redis=arq)
         log.info("api_started", env=settings.env, auth=verifier is not None)
         try:
             yield
         finally:
+            await arq.aclose()
             await client.aclose()
             await engine.dispose()
 
@@ -83,6 +88,7 @@ def create_app(settings: Settings | None = None, http: httpx.AsyncClient | None 
     v1 = APIRouter(prefix="/v1")
     v1.include_router(me.router)
     v1.include_router(files.router)
+    v1.include_router(projects.router)
     v1.include_router(webhooks.router)
     app.include_router(v1)
     return app
