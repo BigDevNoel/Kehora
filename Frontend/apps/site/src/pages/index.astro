@@ -1,0 +1,69 @@
+---
+import Base from "../layouts/Base.astro";
+
+const studio = import.meta.env.PUBLIC_STUDIO_URL ?? "http://localhost:5173";
+
+const makes = [
+  ["3D-printable objects", "Functional parts, gifts, replacement parts from a photo, molds."],
+  ["Electronics", "Circuit, schematic, PCB, firmware and a parts list that's in stock."],
+  ["Enclosures", "Cases generated to fit the exact board, ports and buttons."],
+  ["Laser and CNC", "Flat-pack boxes, signs and stencils with kerf already applied."],
+  ["Companion apps", "A web app that controls your device over Bluetooth or Wi-Fi."],
+  ["Verified before you build", "Every file passes real printability, ERC, DRC and compile checks."],
+];
+---
+
+<Base
+  title="Kehora: describe it, we design it, you make it"
+  description="Kehora turns a plain-language description into a designed, verified and manufacturable product: 3D prints, electronics, enclosures and apps."
+>
+  <header class="wrap top">
+    <a class="logo" href="/"><span aria-hidden="true">K</span> Kehora</a>
+    <a class="btn ghost" href={`${studio}/sign-in`}>Sign in</a>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Describe a physical thing.<br />Get it designed, checked and ready to make.</h1>
+      <p class="lede">
+        Kehora's agents write the spec, design the parts, run the same checks an engineer would,
+        and hand you files you can print, cut, solder and flash.
+      </p>
+      <a class="btn" href={`${studio}/projects`}>Start a design</a>
+    </section>
+
+    <section aria-labelledby="what" class="grid-section">
+      <h2 id="what">What you can make</h2>
+      <ul class="grid">
+        {makes.map(([title, body]) => (
+          <li class="card">
+            <h3>{title}</h3>
+            <p>{body}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Hobby and educational builds. Not certified consumer electronics.</p>
+  </footer>
+</Base>
+
+<style>
+  .wrap { max-width: 64rem; margin: 0 auto; padding: 0 1rem; }
+  .top { display: flex; justify-content: space-between; align-items: center; height: 4rem; }
+  .logo { display: flex; gap: 0.5rem; align-items: center; font-weight: 700; color: inherit; text-decoration: none; }
+  .logo span { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; border-radius: 0.375rem; background: var(--accent); color: #fff; font-size: 0.875rem; }
+  .hero { padding: 4rem 0 3rem; max-width: 44rem; }
+  h1 { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 1rem; }
+  .lede { font-size: 1.125rem; color: var(--muted); margin: 0 0 2rem; }
+  .btn { display: inline-block; padding: 0.7rem 1.2rem; border-radius: 0.5rem; background: var(--accent); color: #fff; font-weight: 600; text-decoration: none; }
+  .btn.ghost { background: transparent; color: inherit; border: 1px solid var(--border); padding: 0.45rem 0.9rem; }
+  .grid-section h2 { font-size: 1rem; color: var(--muted); font-weight: 600; }
+  .grid { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.25rem; }
+  .card h3 { margin: 0 0 0.35rem; font-size: 1rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  .foot { padding: 3rem 1rem; color: var(--muted); font-size: 0.85rem; }
+</style>
