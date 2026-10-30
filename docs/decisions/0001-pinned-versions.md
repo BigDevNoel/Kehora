@@ -64,7 +64,7 @@ this ADR records the direct, load-bearing choices.
 | svix | 2.9.1 |
 | sentry-sdk / langsmith | 2.73.0 / 0.14.16 |
 | structlog | 26.1.0 |
-| uuid-utils | 1.2.0 (UUID v7; Python 3.12 has no `uuid.uuid7`) |
+| uuid-utils | 0.19.0 (UUID v7; Python 3.12 has no `uuid.uuid7`; langsmith requires <1.0) |
 | docker | 7.2.0 |
 | datamodel-code-generator | 0.87.0 |
 | ruff / mypy / pytest | 0.17.3 / 2.4.1 / 9.2.0 |

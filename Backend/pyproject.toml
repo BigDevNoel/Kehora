@@ -3,7 +3,7 @@ name = "kehora-backend"
 version = "0.0.0"
 description = "Kehora backend uv workspace root"
 requires-python = ">=3.12,<3.13"
-dependencies = ["kehora-common", "kehora-schemas", "kehora-db", "kehora-api", "kehora-llm", "kehora-engines", "kehora-engines-runner"]
+dependencies = ["kehora-common", "kehora-schemas", "kehora-db", "kehora-api", "kehora-llm", "kehora-engines", "kehora-engines-runner", "kehora-agents"]
 
 [dependency-groups]
 dev = [
@@ -24,7 +24,7 @@ dev = [
 package = false
 
 [tool.uv.workspace]
-members = ["common", "schemas", "db", "api", "llm", "engines", "engines_runner"]
+members = ["common", "schemas", "db", "api", "llm", "engines", "engines_runner", "agents"]
 
 [tool.uv.sources]
 kehora-common = { workspace = true }
@@ -34,6 +34,7 @@ kehora-api = { workspace = true }
 kehora-llm = { workspace = true }
 kehora-engines = { workspace = true }
 kehora-engines-runner = { workspace = true }
+kehora-agents = { workspace = true }
 
 [tool.ruff]
 line-length = 100
@@ -72,7 +73,7 @@ markers = [
 
 [tool.coverage.run]
 branch = true
-source = ["kehora_common", "kehora_schemas", "kehora_db", "kehora_api", "kehora_llm", "kehora_engines", "kehora_engines_runner"]
+source = ["kehora_common", "kehora_schemas", "kehora_db", "kehora_api", "kehora_llm", "kehora_engines", "kehora_engines_runner", "kehora_agents"]
 omit = ["*/alembic/*", "*/generated/*"]
 
 [[tool.mypy.overrides]]

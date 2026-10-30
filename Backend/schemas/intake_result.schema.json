@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "intake_result.schema.json",
+  "title": "IntakeResult",
+  "description": "Intake agent output: request classification plus the design-policy decision (PRD 6 step 1, PRD 11). The first enum value of `decision` is the permissive one only for schema-minimal test doubles; the policy prompt decides.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind", "decision", "reason"],
+  "properties": {
+    "kind": { "$ref": "project_spec.schema.json#/$defs/ProjectKind" },
+    "decision": { "title": "PolicyDecision", "type": "string", "enum": ["allow", "refuse"] },
+    "reason": { "type": "string", "description": "Short plain-language explanation; shown to the user on refusal." },
+    "policy_category": { "anyOf": [{ "$ref": "#/$defs/PolicyCategory" }, { "type": "null" }], "default": null }
+  },
+  "$defs": {
+    "PolicyCategory": {
+      "title": "PolicyCategory",
+      "type": "string",
+      "enum": ["weapons", "surveillance", "security_bypass", "medical_claims"]
+    }
+  }
+}

@@ -8,6 +8,11 @@ from kehora_schemas.generated.build_state_schema import (
     CheckResult,
     CheckStatus,
 )
+from kehora_schemas.generated.intake_result_schema import (
+    IntakeResult,
+    PolicyCategory,
+    PolicyDecision,
+)
 from kehora_schemas.generated.project_spec_schema import (
     ComponentRequirement,
     Constraints,
@@ -27,7 +32,10 @@ __all__ = [
     "ComponentRequirement",
     "Constraints",
     "Dimensions",
+    "IntakeResult",
     "Money",
+    "PolicyCategory",
+    "PolicyDecision",
     "ProjectKind",
     "ProjectSpec",
     "RunEvent",

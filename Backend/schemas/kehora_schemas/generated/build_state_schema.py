@@ -68,7 +68,10 @@ class BuildState(BaseModel):
     prompt: str = Field(..., min_length=1)
     kind: project_spec_schema.ProjectKind | None = None
     spec: project_spec_schema.ProjectSpec | None = None
-    spec_approved: bool = False
+    spec_approved: bool | None = Field(
+        None, description="null until the user decides at approval gate 1."
+    )
+    version_id: UUID | None = None
     artifacts: list[ArtifactRef] = Field([], validate_default=True)
     checks: list[CheckResult] = Field([], validate_default=True)
     repair_attempts: int = Field(0, ge=0, le=5)
