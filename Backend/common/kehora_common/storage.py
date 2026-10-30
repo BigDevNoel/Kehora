@@ -73,9 +73,7 @@ class Storage:
         )
         return url
 
-    def presign_put(
-        self, key: str, content_type: str, ttl: int = SIGNED_URL_TTL_SECONDS
-    ) -> str:
+    def presign_put(self, key: str, content_type: str, ttl: int = SIGNED_URL_TTL_SECONDS) -> str:
         url: str = self._signer.generate_presigned_url(
             "put_object",
             Params={"Bucket": self.bucket, "Key": key, "ContentType": content_type},
