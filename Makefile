@@ -4,7 +4,7 @@ SHELL := bash
 
 BE := cd Backend &&
 
-.PHONY: help check check-backend
+.PHONY: help check check-backend codegen codegen-check
 
 help:  ## List targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*## /\t/'
@@ -17,3 +17,9 @@ check-backend:  ## Backend lint, types, unit tests
 	$(BE) uv run ruff format --check .
 	$(BE) uv run mypy .
 	$(BE) uv run pytest -q
+
+codegen:  ## Regenerate Pydantic models, TS types and API client from Backend/schemas + OpenAPI
+	$(BE) bash scripts/codegen_py.sh
+
+codegen-check: codegen  ## Fail if generated code is out of date
+	git diff --exit-code -- Backend/schemas/kehora_schemas/generated

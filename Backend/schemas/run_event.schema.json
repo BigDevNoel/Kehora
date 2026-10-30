@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "run_event.schema.json",
+  "title": "RunEvent",
+  "description": "One progress event of an agent run (PRD 10). Stored append-only in run_events and streamed over SSE with `id: seq`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "seq", "type", "payload", "created_at"],
+  "properties": {
+    "run_id": { "type": "string", "format": "uuid" },
+    "seq": { "type": "integer", "minimum": 1, "description": "Monotonic per run, starting at 1." },
+    "type": { "$ref": "#/$defs/RunEventType" },
+    "node": { "type": ["string", "null"], "description": "Graph node that emitted the event, if any.", "default": null },
+    "payload": { "type": "object", "additionalProperties": true },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "RunEventType": {
+      "title": "RunEventType",
+      "type": "string",
+      "enum": [
+        "run_started",
+        "node_started",
+        "node_finished",
+        "artifact_created",
+        "check_passed",
+        "check_warned",
+        "check_failed",
+        "repair_attempt",
+        "needs_input",
+        "needs_approval",
+        "cost_update",
+        "run_finished",
+        "run_failed"
+      ]
+    }
+  }
+}

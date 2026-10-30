@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "build_state.schema.json",
+  "title": "BuildState",
+  "description": "Typed state of a LangGraph build run (PRD 6). Artifacts are file references, never file contents.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "project_id", "org_id", "prompt"],
+  "properties": {
+    "run_id": { "type": "string", "format": "uuid" },
+    "project_id": { "type": "string", "format": "uuid" },
+    "org_id": { "type": "string", "format": "uuid" },
+    "prompt": { "type": "string", "minLength": 1 },
+    "kind": { "anyOf": [{ "$ref": "project_spec.schema.json#/$defs/ProjectKind" }, { "type": "null" }], "default": null },
+    "spec": { "anyOf": [{ "$ref": "project_spec.schema.json" }, { "type": "null" }], "default": null },
+    "spec_approved": { "type": "boolean", "default": false },
+    "artifacts": { "type": "array", "items": { "$ref": "#/$defs/ArtifactRef" }, "default": [] },
+    "checks": { "type": "array", "items": { "$ref": "#/$defs/CheckResult" }, "default": [] },
+    "repair_attempts": { "type": "integer", "minimum": 0, "maximum": 5, "default": 0 },
+    "error": { "type": ["string", "null"], "default": null }
+  },
+  "$defs": {
+    "ArtifactRef": {
+      "title": "ArtifactRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "format", "s3_key", "sha256", "size"],
+      "properties": {
+        "artifact_id": { "type": ["string", "null"], "format": "uuid", "default": null },
+        "type": {
+          "title": "ArtifactType",
+          "type": "string",
+          "enum": ["model", "mesh", "schematic", "pcb", "gerbers", "firmware", "app", "guide", "render", "bom", "log"]
+        },
+        "format": { "type": "string", "minLength": 1 },
+        "s3_key": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "size": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "CheckResult": {
+      "title": "CheckResult",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine", "name", "status"],
+      "properties": {
+        "engine": { "type": "string" },
+        "name": { "type": "string" },
+        "status": { "title": "CheckStatus", "type": "string", "enum": ["pass", "warn", "fail"] },
+        "report": { "type": "object", "additionalProperties": true, "default": {} }
+      }
+    }
+  }
+}

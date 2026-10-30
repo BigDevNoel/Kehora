@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "project_spec.schema.json",
+  "title": "ProjectSpec",
+  "description": "Structured spec written by the spec agent and confirmed by the user at approval gate 1 (PRD 6). v0: only kind, title and summary are required so later phases can extend without breaking changes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "title", "summary"],
+  "properties": {
+    "schema_version": { "const": 0 },
+    "kind": { "$ref": "#/$defs/ProjectKind" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "requirements": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "dimensions": { "anyOf": [{ "$ref": "#/$defs/Dimensions" }, { "type": "null" }], "default": null },
+    "constraints": { "$ref": "#/$defs/Constraints" },
+    "components": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ComponentRequirement" },
+      "default": []
+    },
+    "success_criteria": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    }
+  },
+  "$defs": {
+    "ProjectKind": {
+      "title": "ProjectKind",
+      "type": "string",
+      "enum": ["object", "device", "robot", "laser", "app", "mixed"]
+    },
+    "Dimensions": {
+      "title": "Dimensions",
+      "description": "Overall bounding size in millimetres.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width_mm": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "depth_mm": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "height_mm": { "type": ["number", "null"], "exclusiveMinimum": 0 }
+      }
+    },
+    "Money": {
+      "title": "Money",
+      "description": "CLAUDE.md rule 6: integer minor units plus ISO 4217 currency code.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount_minor", "currency"],
+      "properties": {
+        "amount_minor": { "type": "integer", "minimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+      }
+    },
+    "Constraints": {
+      "title": "Constraints",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "budget": { "anyOf": [{ "$ref": "#/$defs/Money" }, { "type": "null" }], "default": null },
+        "material": { "type": ["string", "null"], "default": null },
+        "printer": { "type": ["string", "null"], "default": null },
+        "power_source": { "type": ["string", "null"], "default": null }
+      }
+    },
+    "ComponentRequirement": {
+      "title": "ComponentRequirement",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "quantity": { "type": "integer", "minimum": 1, "default": 1 },
+        "notes": { "type": ["string", "null"], "default": null }
+      }
+    }
+  }
+}

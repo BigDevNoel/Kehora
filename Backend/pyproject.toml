@@ -3,7 +3,7 @@ name = "kehora-backend"
 version = "0.0.0"
 description = "Kehora backend uv workspace root"
 requires-python = ">=3.12,<3.13"
-dependencies = ["kehora-common"]
+dependencies = ["kehora-common", "kehora-schemas"]
 
 [dependency-groups]
 dev = [
@@ -14,21 +14,23 @@ dev = [
     "pytest-cov==7.1.0",
     "datamodel-code-generator==0.87.0",
     "types-pyyaml",
+    "jsonschema==4.26.0",
+    "types-jsonschema",
 ]
 
 [tool.uv]
 package = false
 
 [tool.uv.workspace]
-members = ["common"]
+members = ["common", "schemas"]
 
 [tool.uv.sources]
 kehora-common = { workspace = true }
+kehora-schemas = { workspace = true }
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = ["schemas/kehora_schemas/generated"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "ASYNC", "S", "RUF", "TID"]
@@ -39,6 +41,7 @@ known-first-party = ["kehora_*"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S105", "S106", "S108"]
+"schemas/kehora_schemas/generated/**" = ["E501", "S105"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -60,5 +63,5 @@ markers = [
 
 [tool.coverage.run]
 branch = true
-source = ["kehora_common"]
+source = ["kehora_common", "kehora_schemas"]
 omit = ["*/alembic/*", "*/generated/*"]
