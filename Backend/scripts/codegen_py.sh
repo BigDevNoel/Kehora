@@ -4,8 +4,10 @@
 set -euo pipefail
 
 out=schemas/kehora_schemas/generated
-src=$(mktemp -d)
-trap 'rm -rf "$src"' EXIT
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+src="$tmp/schemas"  # fixed name: it appears in the generated header
+mkdir "$src"
 cp schemas/*.schema.json "$src"/
 
 rm -rf "$out"

@@ -13,7 +13,7 @@ from collections.abc import AsyncIterator
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, Header, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy import delete, select
@@ -121,7 +121,19 @@ class Idempotency:
             await s.commit()
 
 
-async def idempotency(state: State, auth: Auth, request: Request) -> AsyncIterator[Idempotency]:
+async def idempotency(
+    state: State,
+    auth: Auth,
+    request: Request,
+    _key: Annotated[
+        str | None,
+        Header(
+            alias=HEADER,
+            max_length=255,
+            description="Optional. Retries with the same key replay the first response.",
+        ),
+    ] = None,
+) -> AsyncIterator[Idempotency]:
     idem = Idempotency(state, auth, request, await request.body())
     try:
         yield idem
