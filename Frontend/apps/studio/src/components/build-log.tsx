@@ -58,6 +58,7 @@ export function BuildLog({ log }: { log: BuildLogState }) {
             <li
               key={line.seq}
               data-event-type={line.type}
+              data-seq={line.seq}
               className={cn("flex items-start gap-2", TONE_CLASS[line.tone])}
             >
               <Icon className={cn("mt-0.5 size-3.5 shrink-0", live && "animate-spin")} aria-hidden />
