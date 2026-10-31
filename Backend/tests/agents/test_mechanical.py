@@ -181,3 +181,23 @@ def test_printer_and_material_come_from_the_spec(
     spec = SPEC.model_copy(update={"constraints": Constraints(printer=printer, material=material)})
     assert pick_printer(spec).id == want_printer
     assert pick_material(spec).id == want_material
+
+
+def _broken_json() -> Completion:
+    return Completion(provider="fake", model="fake-large", text='{"script": "result = Bo')
+
+
+async def test_cut_off_reply_gets_one_more_try_with_a_note() -> None:
+    gateway, fake = _gateway(_broken_json(), _design("result = Box(20, 20, 20)"))
+    result = await design_part(gateway, FakeCadSandbox(), SPEC)
+    assert result.ok and result.repair_attempts == 0 and len(fake.calls) == 2
+    retry = fake.calls[1][1].messages[0].content[-1].text  # type: ignore[union-attr]
+    assert "could not be used" in retry and "stop_reason" in retry
+
+
+async def test_two_bad_replies_in_a_row_fail_loudly() -> None:
+    from kehora_llm.errors import OutputValidationError
+
+    gateway, _ = _gateway(_broken_json(), _broken_json())
+    with pytest.raises(OutputValidationError, match="stop_reason"):
+        await design_part(gateway, FakeCadSandbox(), SPEC)

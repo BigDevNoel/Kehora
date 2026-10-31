@@ -127,8 +127,25 @@ def _text(resp: types.GenerateContentResponse) -> str:
 class GeminiAdapter:
     provider = "gemini"
 
-    def __init__(self, api_key: str, timeout: float = 600.0, http_client: Any = None) -> None:
-        options = types.HttpOptions(timeout=int(timeout * 1000), httpx_async_client=http_client)
+    def __init__(
+        self,
+        api_key: str,
+        timeout: float = 600.0,
+        max_retries: int = 4,
+        retry_delay: float = 2.0,
+        http_client: Any = None,
+    ) -> None:
+        # Gemini returns 503 "high demand" in bursts: retry the same model with backoff before
+        # the gateway falls back to another provider (the other adapters' SDKs do the same).
+        retry = types.HttpRetryOptions(
+            attempts=max_retries + 1,
+            initial_delay=retry_delay,
+            max_delay=30.0,
+            http_status_codes=[429, 500, 502, 503, 504],
+        )
+        options = types.HttpOptions(
+            timeout=int(timeout * 1000), httpx_async_client=http_client, retry_options=retry
+        )
         self._client = genai.Client(api_key=api_key, http_options=options)
 
     async def complete(self, model: str, request: LLMRequest) -> Completion:

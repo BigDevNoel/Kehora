@@ -16,6 +16,7 @@ from kehora_engines.printability import PrintabilityEngine, PrintabilityInput
 from kehora_engines.printability.profiles import materials, printers
 from kehora_engines_runner.runner import run_engine
 from kehora_engines_runner.sandbox import SandboxProvider
+from kehora_llm.errors import OutputValidationError
 from kehora_llm.gateway import Gateway, UsageSink
 from kehora_llm.types import Message
 from kehora_schemas import (
@@ -29,6 +30,7 @@ from kehora_schemas import (
 )
 
 MAX_REPAIRS = 5  # PRD 6; BuildState.repair_attempts caps at 5 too
+OUTPUT_RETRIES = 1  # extra tries when a reply is not valid MechanicalDesign JSON
 DEFAULT_PRINTER = "prusa-mk4"
 DEFAULT_MATERIAL = "pla"
 
@@ -154,26 +156,43 @@ async def design_part(
     text = brief(spec, printer, material)
     usage: dict[str, Any] = {"on_usage": on_usage} if on_usage else {}
 
-    design = await gateway.structured(
-        "mechanical",
-        MechanicalDesign,
-        [Message.user(text)],
-        system=prompts.load(*prompts.MECHANICAL),
-        **usage,
-    )
+    design = await _ask(gateway, "mechanical", prompts.MECHANICAL, text, usage)
     history = [await verify(sandbox, design, printer, material)]
     while not history[-1].ok and len(history) <= MAX_REPAIRS:
         attempt = len(history)
         await on_repair(attempt, history[-1].failures)
-        design = await gateway.structured(
-            "repair",
-            MechanicalDesign,
-            [Message.user(_repair_message(text, history[-1]))],
-            system=prompts.load(*prompts.MECHANICAL_REPAIR),
-            **usage,
-        )
+        message = _repair_message(text, history[-1])
+        design = await _ask(gateway, "repair", prompts.MECHANICAL_REPAIR, message, usage)
         history.append(await verify(sandbox, design, printer, material))
     return DesignResult(final=history[-1], repair_attempts=len(history) - 1, history=history)
+
+
+async def _ask(
+    gateway: Gateway,
+    role: str,
+    prompt: tuple[str, int],
+    message: str,
+    usage: dict[str, Any],
+) -> MechanicalDesign:
+    """One structured call; a reply that is not valid JSON (often cut off) gets one more try."""
+    note = ""
+    for attempt in range(OUTPUT_RETRIES + 1):
+        try:
+            return await gateway.structured(
+                role,
+                MechanicalDesign,
+                [Message.user(message + note)],
+                system=prompts.load(*prompt),
+                **usage,
+            )
+        except OutputValidationError as e:
+            if attempt == OUTPUT_RETRIES:
+                raise
+            note = (
+                f"\n\nYour previous reply could not be used ({str(e)[:200]}). Reply with only "
+                "the JSON object, and keep the script short enough to finish."
+            )
+    raise AssertionError("unreachable")
 
 
 def _describe(check: CheckResult) -> str:

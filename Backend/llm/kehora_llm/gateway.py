@@ -143,7 +143,10 @@ class Gateway:
         try:
             return output.model_validate(json.loads(completion.text))
         except (json.JSONDecodeError, ValidationError) as exc:
-            raise OutputValidationError(f"{output.__name__}: {exc}") from exc
+            # The stop reason tells a cut-off reply (token limit) from a malformed one.
+            raise OutputValidationError(
+                f"{output.__name__} (stop_reason={completion.stop_reason}): {exc}"
+            ) from exc
 
     async def tool_call(
         self,

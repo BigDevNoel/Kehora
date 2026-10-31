@@ -16,10 +16,43 @@ Handler = Callable[[httpx.Request], httpx.Response]
 PNG = base64.b64encode(b"\x89PNG fake").decode()
 
 
-def _adapter(handler: Handler) -> GeminiAdapter:
+def _adapter(handler: Handler, retries: int = 0) -> GeminiAdapter:
     return GeminiAdapter(
-        "test-key", http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler))
+        "test-key",
+        max_retries=retries,
+        retry_delay=0.01,
+        http_client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
     )
+
+
+async def test_temporary_overload_is_retried_on_the_same_model() -> None:
+    calls: list[int] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(1)
+        if len(calls) < 3:
+            error = {"error": {"code": 503, "message": "high demand", "status": "UNAVAILABLE"}}
+            return httpx.Response(503, json=error)
+        return httpx.Response(200, json=_response())
+
+    completion = await _adapter(handler, retries=4).complete(
+        "gemini-3.8-flash", LLMRequest(messages=[Message.user("hi")])
+    )
+    assert completion.text == '{"ok": true}' and len(calls) == 3
+
+
+async def test_bad_requests_are_not_retried() -> None:
+    calls: list[int] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(1)
+        return httpx.Response(400, json={"error": {"code": 400, "message": "bad", "status": "X"}})
+
+    with pytest.raises(FatalLLMError):
+        await _adapter(handler, retries=4).complete(
+            "gemini-3.8-flash", LLMRequest(messages=[Message.user("hi")])
+        )
+    assert len(calls) == 1
 
 
 def _response(**overrides: Any) -> dict[str, Any]:
