@@ -9,7 +9,7 @@ GENERATED := Backend/schemas/kehora_schemas/generated Backend/api/openapi.json \
 	Frontend/packages/types/src/generated Frontend/packages/api-client/src/generated
 gen_sum = find $(GENERATED) -type f -not -path '*__pycache__*' | sort | xargs sha256sum | sha256sum
 
-.PHONY: help dev down logs check check-backend check-frontend e2e services migrate codegen codegen-check evals engine-images
+.PHONY: help dev down logs check check-backend check-frontend e2e services migrate deps codegen codegen-check evals engine-images
 
 help:  ## List targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*## /\t/'
@@ -52,7 +52,11 @@ engine-images:  ## Build the engine sandbox images (tags must match IMAGE in eac
 migrate:  ## alembic upgrade head
 	$(BE) cd db && uv run alembic upgrade head
 
-codegen:  ## Regenerate Pydantic models, TS types and API client from Backend/schemas + OpenAPI
+deps:  ## Install backend and frontend dependencies from the lock files
+	$(BE) uv sync --frozen -q
+	$(FE) pnpm install --frozen-lockfile --silent
+
+codegen: deps  ## Regenerate Pydantic models, TS types and API client from Backend/schemas + OpenAPI
 	$(BE) bash scripts/codegen_py.sh
 	$(BE) uv run python scripts/export_openapi.py
 	$(FE) cd packages/types && node scripts/codegen.mjs ../../../Backend/schemas
@@ -60,7 +64,9 @@ codegen:  ## Regenerate Pydantic models, TS types and API client from Backend/sc
 
 codegen-check:  ## Fail if generated code is stale (regenerates, compares checksums)
 	@before=$$($(gen_sum)); \
-	$(MAKE) -s codegen >/dev/null 2>&1; \
+	if ! out=$$($(MAKE) -s codegen 2>&1); then \
+		echo "$$out"; echo "codegen failed (see above)"; exit 1; \
+	fi; \
 	after=$$($(gen_sum)); \
 	if [ "$$before" != "$$after" ]; then \
 		echo "Generated code was stale and has been regenerated; review and commit it."; exit 1; \
