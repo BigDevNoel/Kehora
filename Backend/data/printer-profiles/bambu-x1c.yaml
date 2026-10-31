@@ -1,0 +1,6 @@
+id: bambu-x1c
+name: Bambu Lab X1 Carbon
+technology: fdm
+build_volume_mm: {x: 256, y: 256, z: 256}
+nozzle_mm: 0.4
+layer_height_mm: 0.2

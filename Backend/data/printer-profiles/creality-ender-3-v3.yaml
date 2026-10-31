@@ -1,0 +1,6 @@
+id: creality-ender-3-v3
+name: Creality Ender-3 V3
+technology: fdm
+build_volume_mm: {x: 220, y: 220, z: 250}
+nozzle_mm: 0.4
+layer_height_mm: 0.2

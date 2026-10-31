@@ -1,0 +1,6 @@
+id: elegoo-neptune-4
+name: Elegoo Neptune 4
+technology: fdm
+build_volume_mm: {x: 225, y: 225, z: 265}
+nozzle_mm: 0.4
+layer_height_mm: 0.2

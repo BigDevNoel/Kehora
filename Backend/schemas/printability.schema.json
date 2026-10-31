@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "printability.schema.json",
+  "title": "PrintabilityReport",
+  "description": "Printability engine output for one mesh on one printer and material (PRD 7, PRD 8.2). Shown to the user before download or order; any issue with severity `error` blocks printing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["printer_id", "material_id", "blocking", "watertight", "as_given", "recommended", "min_wall_mm", "thin_wall_fraction", "issues"],
+  "properties": {
+    "printer_id": { "type": "string", "minLength": 1 },
+    "material_id": { "type": "string", "minLength": 1 },
+    "blocking": { "type": "boolean", "description": "True when any issue has severity `error`." },
+    "watertight": { "type": "boolean" },
+    "as_given": { "$ref": "#/$defs/OrientationResult" },
+    "recommended": { "$ref": "#/$defs/OrientationResult" },
+    "min_wall_mm": { "type": ["number", "null"], "minimum": 0, "description": "2nd-percentile sampled wall thickness; null when not measurable." },
+    "thin_wall_fraction": { "type": "number", "minimum": 0, "maximum": 1, "description": "Share of sampled surface area thinner than the minimum printable wall." },
+    "issues": { "type": "array", "items": { "$ref": "#/$defs/PrintIssue" }, "default": [] }
+  },
+  "$defs": {
+    "PrinterTechnology": { "title": "PrinterTechnology", "type": "string", "enum": ["fdm"] },
+    "Size3": {
+      "title": "Size3",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0 },
+        "y": { "type": "number", "minimum": 0 },
+        "z": { "type": "number", "minimum": 0 }
+      }
+    },
+    "PrinterProfile": {
+      "title": "PrinterProfile",
+      "description": "A printer the user can target. Shipped profiles live in Backend/data/printer-profiles; users can add their own.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "technology", "build_volume_mm", "nozzle_mm", "layer_height_mm"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "technology": { "$ref": "#/$defs/PrinterTechnology" },
+        "build_volume_mm": { "$ref": "#/$defs/Size3" },
+        "nozzle_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 2 },
+        "layer_height_mm": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      }
+    },
+    "Material": {
+      "title": "Material",
+      "description": "A print material. Shipped materials live in Backend/data/materials.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "technology", "max_overhang_deg", "min_wall_lines"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "technology": { "$ref": "#/$defs/PrinterTechnology" },
+        "max_overhang_deg": { "type": "number", "minimum": 0, "maximum": 90, "description": "Steepest overhang, measured from vertical, that prints without support." },
+        "min_wall_lines": { "type": "integer", "minimum": 1, "maximum": 10, "description": "Extrusion lines a wall needs to be sturdy; min wall = lines x nozzle." },
+        "density_g_cm3": { "type": ["number", "null"], "exclusiveMinimum": 0, "default": null }
+      }
+    },
+    "OrientationResult": {
+      "title": "OrientationResult",
+      "description": "The mesh measured in one orientation, resting on the bed at z = 0.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rotation_deg", "size_mm", "fits_bed", "rotate_z_90", "overhang_area_mm2", "bed_contact_area_mm2"],
+      "properties": {
+        "rotation_deg": { "$ref": "#/$defs/Size3", "description": "Rotation about X, then Y, then Z, applied to the mesh as given." },
+        "size_mm": { "$ref": "#/$defs/Size3" },
+        "fits_bed": { "type": "boolean" },
+        "rotate_z_90": { "type": "boolean", "description": "True when it fits only after turning 90 degrees on the bed." },
+        "overhang_area_mm2": { "type": "number", "minimum": 0, "description": "Downward-facing area steeper than the material allows, excluding the bed contact." },
+        "bed_contact_area_mm2": { "type": "number", "minimum": 0 }
+      }
+    },
+    "PrintFix": {
+      "title": "PrintFix",
+      "description": "One-click fix offered for an issue (PRD 8.2).",
+      "type": "string",
+      "enum": ["reorient", "thicken_walls", "add_supports", "split_for_bed", "repair_mesh"]
+    },
+    "PrintIssue": {
+      "title": "PrintIssue",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "severity", "message"],
+      "properties": {
+        "code": {
+          "title": "PrintIssueCode",
+          "type": "string",
+          "enum": ["not_watertight", "exceeds_bed", "walls_too_thin", "thin_walls", "overhangs", "small_bed_contact"]
+        },
+        "severity": { "title": "PrintIssueSeverity", "type": "string", "enum": ["error", "warning"] },
+        "message": { "type": "string", "minLength": 1, "description": "Plain-language explanation shown to the user." },
+        "fixes": { "type": "array", "items": { "$ref": "#/$defs/PrintFix" }, "default": [] }
+      }
+    }
+  }
+}

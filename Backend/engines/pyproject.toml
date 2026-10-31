@@ -3,7 +3,7 @@ name = "kehora-engines"
 version = "0.0.0"
 description = "Pure making engines: typed input, sandbox job, typed output, own verifier"
 requires-python = ">=3.12,<3.13"
-dependencies = ["kehora-schemas", "pydantic==2.14.2"]
+dependencies = ["kehora-schemas", "pydantic==2.14.2", "pyyaml==6.0.3"]
 
 [build-system]
 requires = ["hatchling"]
