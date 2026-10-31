@@ -2,13 +2,18 @@
 # timeouts, 429 and 5xx (ADR-0007). Select a profile with LLM_ROUTING_PROFILE.
 # Model refs are "<provider>/<model id>". Changing models is a config change, not a code change.
 profiles:
+  # Gemini first (owner's choice, ADR-0013); a provider without a key is skipped, so the
+  # Anthropic and OpenAI entries only act as fallbacks when their keys are set.
+  # TEMPORARY (2026-10-31): every role on gemini-3.8-flash because the key is on the free tier,
+  # which has no gemini-4-argon quota. Once billing is on, move spec, planner, mechanical and
+  # vision back to gemini/gemini-4-argon.
   default:
-    intake: [anthropic/claude-haiku-5-5, openai/gpt-5.4-mini]
-    spec: [anthropic/claude-opus-5-5, openai/gpt-5.5]
-    planner: [anthropic/claude-opus-5-5, openai/gpt-5.5]
-    mechanical: [anthropic/claude-opus-5-5, openai/gpt-5.5]
-    repair: [anthropic/claude-sonnet-5-5, openai/gpt-5.4-mini]
-    vision: [anthropic/claude-opus-5-5, openai/gpt-5.5]
+    intake: [gemini/gemini-3.8-flash, anthropic/claude-haiku-5-5, openai/gpt-5.4-mini]
+    spec: [gemini/gemini-3.8-flash, anthropic/claude-opus-5-5, openai/gpt-5.5]
+    planner: [gemini/gemini-3.8-flash, anthropic/claude-opus-5-5, openai/gpt-5.5]
+    mechanical: [gemini/gemini-3.8-flash, anthropic/claude-opus-5-5, openai/gpt-5.5]
+    repair: [gemini/gemini-3.8-flash, anthropic/claude-sonnet-5-5, openai/gpt-5.4-mini]
+    vision: [gemini/gemini-3.8-flash, anthropic/claude-opus-5-5, openai/gpt-5.5]
   # Offline and deterministic: used by `make check`, Playwright and CI.
   test:
     intake: [fake/fake-small]

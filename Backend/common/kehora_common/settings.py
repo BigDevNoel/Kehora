@@ -43,6 +43,7 @@ class Settings(BaseSettings):
 
     anthropic_api_key: SecretStr | None = None
     openai_api_key: SecretStr | None = None
+    gemini_api_key: SecretStr | None = None
     llm_routing_profile: str = "default"
 
     sandbox_provider: str = Field(default="local_docker", pattern="^(local_docker|e2b)$")

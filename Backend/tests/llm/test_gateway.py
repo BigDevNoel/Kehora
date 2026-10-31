@@ -41,8 +41,9 @@ REQ = LLMRequest(messages=[Message.user("a phone stand")])
 
 def test_routing_profiles_load_and_reject_unknown() -> None:
     table = RoutingTable.load("default")
-    assert str(table.chain("spec")[0]) == "anthropic/claude-opus-5-5"
-    assert table.providers() == {"anthropic", "openai"}
+    assert str(table.chain("spec")[0]) == "gemini/gemini-3.8-flash"  # temporary, ADR-0013
+    assert str(table.chain("repair")[0]) == "gemini/gemini-3.8-flash"
+    assert table.providers() == {"gemini", "anthropic", "openai"}
     assert RoutingTable.load("test").providers() == {"fake"}
     with pytest.raises(ValueError, match="unknown LLM routing profile"):
         RoutingTable.load("nope")
@@ -156,6 +157,14 @@ async def test_tool_call_and_vision_pass_tools_and_images() -> None:
 def test_build_gateway_requires_a_usable_provider() -> None:
     with pytest.raises(FatalLLMError, match="no usable provider"):
         build_gateway(Settings(llm_routing_profile="default", _env_file=None))
+
+
+def test_gemini_key_alone_is_a_usable_gateway() -> None:
+    gw = build_gateway(
+        Settings(llm_routing_profile="default", gemini_api_key="g-test", _env_file=None)
+    )
+    assert set(gw.adapters) == {"gemini"}
+    assert [str(ref) for ref, _ in gw._candidates("mechanical")] == ["gemini/gemini-3.8-flash"]
 
 
 def test_minimal_instance_handles_refs_nullables_and_enums() -> None:
