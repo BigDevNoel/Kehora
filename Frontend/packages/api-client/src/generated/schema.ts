@@ -364,12 +364,41 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /**
+             * Name
+             * @description File name, e.g. part.stl.
+             */
+            name: string;
             /** Sha256 */
             sha256: string;
             /** Size */
             size: number;
             /** Type */
             type: string;
+        };
+        /**
+         * CheckOut
+         * @description A verifier result on one of the version's artifacts. For `printability/printable` the
+         *     report is a full PrintabilityReport (Backend/schemas/printability.schema.json).
+         */
+        CheckOut: {
+            /** Artifact Id */
+            artifact_id: string | null;
+            /** Engine */
+            engine: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Report */
+            report: {
+                [key: string]: unknown;
+            };
+            /** Status */
+            status: string;
         };
         /** CreateProject */
         CreateProject: {
@@ -586,6 +615,8 @@ export interface components {
         VersionOut: {
             /** Artifacts */
             artifacts: components["schemas"]["ArtifactOut"][];
+            /** Checks */
+            checks?: components["schemas"]["CheckOut"][];
             /**
              * Created At
              * Format: date-time

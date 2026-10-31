@@ -10,7 +10,16 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from kehora_api.sse import run_events
 from kehora_common.events import RUN_QUEUE, stream_id, stream_key
-from kehora_db.models import AgentRun, Approval, Membership, RunEventRow
+from kehora_db.models import (
+    AgentRun,
+    Approval,
+    Artifact,
+    Check,
+    Membership,
+    Project,
+    ProjectVersion,
+    RunEventRow,
+)
 from tests.api.fake_clerk import FakeClerk
 
 pytestmark = [pytest.mark.db, pytest.mark.redis]
@@ -96,6 +105,56 @@ async def test_project_and_run_are_member_only(client: httpx.AsyncClient, clerk:
     assert (await client.get(f"/v1/runs/{rid}/events", headers=other)).status_code == 404
     detail = (await client.get(f"/v1/projects/{pid}", headers=headers)).json()
     assert detail["current_version"] is None and detail["runs"][0]["id"] == rid
+
+
+async def test_project_detail_returns_artifacts_and_their_checks(
+    client: httpx.AsyncClient, clerk: FakeClerk, session: AsyncSession
+) -> None:
+    headers, _ = await _user(client, clerk)
+    body = await _create(client, headers)
+    pid, rid = uuid.UUID(body["project"]["id"]), uuid.UUID(body["run"]["id"])
+    version = ProjectVersion(
+        project_id=pid, number=1, spec={"title": "Cube"}, created_by_run_id=rid
+    )
+    session.add(version)
+    await session.flush()
+    stl = Artifact(
+        version_id=version.id,
+        type="mesh",
+        format="stl",
+        s3_key=f"projects/{pid}/versions/{version.id}/mechanical/part.stl",
+        sha256="0" * 64,
+        size=684,
+    )
+    session.add(stl)
+    await session.flush()
+    report = {"printer_id": "prusa-mk4", "blocking": False, "issues": []}
+    session.add(
+        Check(
+            run_id=rid,
+            artifact_id=stl.id,
+            engine="printability",
+            name="printable",
+            status="pass",
+            report=report,
+        )
+    )
+    project = await session.get(Project, pid)
+    assert project is not None
+    project.current_version_id = version.id
+    await session.commit()
+
+    detail = (await client.get(f"/v1/projects/{pid}", headers=headers)).json()
+    [artifact] = detail["current_version"]["artifacts"]
+    assert artifact["name"] == "part.stl" and artifact["format"] == "stl"
+    [check] = detail["current_version"]["checks"]
+    assert check["artifact_id"] == artifact["id"]
+    assert (check["engine"], check["name"], check["status"]) == (
+        "printability",
+        "printable",
+        "pass",
+    )
+    assert check["report"] == report
 
 
 async def test_approve_spec_resumes_run(

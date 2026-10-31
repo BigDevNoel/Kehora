@@ -3,12 +3,21 @@ import { Button, Tabs, TabsContent, TabsList, TabsTrigger } from "@kehora/ui";
 import { ViewerPlaceholder } from "@kehora/viewer";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, FileText } from "lucide-react";
+import { lazy, Suspense } from "react";
 
 import { unwrap, useApi } from "../api";
 import { ApproveSpec } from "../components/approve-spec";
 import { BuildLog } from "../components/build-log";
+import { PrintabilityPanel } from "../components/printability-panel";
 import { SpecCard } from "../components/spec-card";
+import { fileLabel, formatBytes, printability, viewableMesh } from "../lib/artifacts";
 import { useRunEvents } from "../lib/use-run-events";
+
+// three.js is large: load the 3D viewer only when a project has a mesh to show.
+const ModelViewer = lazy(() => import("@kehora/viewer/model"));
+
+// Signed URLs live 10 minutes (API files router); refresh a little before they expire.
+const SIGNED_URL_STALE_MS = 8 * 60 * 1000;
 
 // One render for both layouts: tabs below 768px, three columns from md up.
 const PANEL =
@@ -27,20 +36,34 @@ export function StudioPage({ projectId }: { projectId: string }) {
     queryClient.invalidateQueries({ queryKey: ["project", projectId] }),
   );
 
-  async function download(artifactId: string) {
+  async function signedUrl(artifactId: string) {
     const res = unwrap(
       await client.GET("/v1/artifacts/{artifact_id}/download", {
         params: { path: { artifact_id: artifactId } },
       }),
     );
-    window.open(res.url, "_blank", "noopener");
+    return res.url;
   }
+
+  async function download(artifactId: string) {
+    window.open(await signedUrl(artifactId), "_blank", "noopener");
+  }
+
+  const mesh = viewableMesh(project.data?.current_version?.artifacts ?? []);
+  const meshUrl = useQuery({
+    queryKey: ["artifact-url", mesh?.id],
+    queryFn: () => signedUrl(mesh!.id),
+    enabled: !!mesh,
+    staleTime: SIGNED_URL_STALE_MS,
+    refetchInterval: SIGNED_URL_STALE_MS,
+  });
 
   if (project.isPending) return <p className="p-6 text-sm text-muted-foreground">Loading project…</p>;
   if (project.error) return <p className="p-6 text-sm text-destructive">{project.error.message}</p>;
 
   const version = project.data.current_version;
   const spec = (version?.spec as ProjectSpec | undefined) ?? log.pendingSpec;
+  const verdict = printability(version?.checks ?? []);
 
   return (
     <Tabs defaultValue="build" className="flex min-h-0 flex-1 flex-col">
@@ -68,10 +91,17 @@ export function StudioPage({ projectId }: { projectId: string }) {
 
         <TabsContent value="viewer" forceMount className={PANEL}>
           <h1 className="text-lg font-semibold" data-testid="project-title">{project.data.title}</h1>
-          <ViewerPlaceholder title="3D viewer" />
+          {mesh && meshUrl.data ? (
+            <Suspense fallback={<ViewerPlaceholder title="3D viewer" hint="Loading the model…" />}>
+              <ModelViewer url={meshUrl.data} />
+            </Suspense>
+          ) : (
+            <ViewerPlaceholder title="3D viewer" />
+          )}
         </TabsContent>
 
         <TabsContent value="props" forceMount className={PANEL}>
+          {verdict && <PrintabilityPanel status={verdict.status} report={verdict.report} />}
           <h2 className="text-sm font-semibold">Spec</h2>
           {spec ? <SpecCard spec={spec} /> : <p className="text-sm text-muted-foreground">No spec yet.</p>}
           <h2 className="text-sm font-semibold">Files</h2>
@@ -81,9 +111,14 @@ export function StudioPage({ projectId }: { projectId: string }) {
                 <li key={a.id} className="flex items-center justify-between gap-2 rounded-md border p-2 text-sm">
                   <span className="flex items-center gap-2">
                     <FileText className="size-4 text-muted-foreground" aria-hidden />
-                    {a.type}.{a.format} <span className="text-xs text-muted-foreground">{a.size} B</span>
+                    <span>
+                      {fileLabel(a)}
+                      <span className="block text-xs text-muted-foreground">
+                        {a.name} · {formatBytes(a.size)}
+                      </span>
+                    </span>
                   </span>
-                  <Button size="icon" variant="ghost" aria-label={`Download ${a.type}`} onClick={() => download(a.id)}>
+                  <Button size="icon" variant="ghost" aria-label={`Download ${a.name}`} onClick={() => download(a.id)}>
                     <Download aria-hidden />
                   </Button>
                 </li>

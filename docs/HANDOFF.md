@@ -117,6 +117,9 @@ engine, studio 3D viewer and parameters panel.
 - Upload scanning/re-encoding, rate limits and credit checks are later-phase work (credits sit
   behind `FEATURE_CREDITS_ENFORCED`).
 - OpenTelemetry is not wired yet.
+- The studio 3D viewer fetches STLs straight from signed S3 URLs. Local SeaweedFS allows
+  cross-origin reads by default; production S3 needs a bucket CORS rule allowing `GET` from the
+  studio origin (add it in Terraform with the bucket).
 
 ## How to resume
 

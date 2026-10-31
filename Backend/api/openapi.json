@@ -295,6 +295,11 @@
             "title": "Id",
             "type": "string"
           },
+          "name": {
+            "description": "File name, e.g. part.stl.",
+            "title": "Name",
+            "type": "string"
+          },
           "sha256": {
             "title": "Sha256",
             "type": "string"
@@ -310,6 +315,7 @@
         },
         "required": [
           "id",
+          "name",
           "type",
           "format",
           "size",
@@ -317,6 +323,55 @@
           "created_at"
         ],
         "title": "ArtifactOut",
+        "type": "object"
+      },
+      "CheckOut": {
+        "description": "A verifier result on one of the version's artifacts. For `printability/printable` the\nreport is a full PrintabilityReport (Backend/schemas/printability.schema.json).",
+        "properties": {
+          "artifact_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Id"
+          },
+          "engine": {
+            "title": "Engine",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "report": {
+            "additionalProperties": true,
+            "title": "Report",
+            "type": "object"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "artifact_id",
+          "engine",
+          "name",
+          "status",
+          "report"
+        ],
+        "title": "CheckOut",
         "type": "object"
       },
       "CreateProject": {
@@ -948,6 +1003,13 @@
               "$ref": "#/components/schemas/ArtifactOut"
             },
             "title": "Artifacts",
+            "type": "array"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckOut"
+            },
+            "title": "Checks",
             "type": "array"
           },
           "created_at": {
