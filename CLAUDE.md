@@ -1,6 +1,6 @@
-# CLAUDE.md — Forge (AI Hardware Studio)
+# CLAUDE.md — Kehora (AI Hardware Studio)
 
-Forge turns a plain-language description into a designed, verified and manufacturable physical product:
+Kehora turns a plain-language description into a designed, verified and manufacturable physical product:
 3D-printable objects, electronics (circuit, PCB, firmware), enclosures, laser/CNC parts and companion apps.
 The full product spec is in `docs/PRD.md`. Read the relevant PRD section before starting any feature.
 
