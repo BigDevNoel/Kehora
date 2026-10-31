@@ -12,7 +12,7 @@ and the offline `test` LLM profile (deterministic fake model, no API cost).
 | Check | What it proves | Result |
 | --- | --- | --- |
 | `Backend/tests/system/test_compose_restart.py` | Killing the worker container mid-engine and restarting it finishes the run exactly once: no duplicate event seqs, one version, one artifact | Pass |
-| Playwright `run-flow.spec.ts` | Sign in through Clerk, create a project, watch events stream live, approve the spec, see `run_finished` | Pass, 4 of 4 runs |
+| Playwright `run-flow.spec.ts` | Sign in through Clerk, create a project, watch events stream live, approve the spec, see `run_finished` | Pass, 4 of 4 local runs and on GitHub CI |
 | Playwright `run-resume.spec.ts` | The same open page keeps streaming while the worker is killed and restarted; the run resumes from its checkpoint and finishes once | Pass 3 of 4 runs (see "Open issues") |
 
 Supporting checks at the same commit range:
@@ -53,9 +53,10 @@ Supporting checks at the same commit range:
    never answered, with no error logged while health checks kept passing. Three later runs
    passed. If it recurs, capture `docker compose logs api` and a Postgres `pg_stat_activity`
    snapshot during the hang.
-2. **CI secrets.** GitHub repository secrets for Clerk are not set yet, so CI cannot run the
-   Playwright step. Needed: `CLERK_ISSUER`, `CLERK_SECRET_KEY`, `CLERK_WEBHOOK_SIGNING_SECRET`,
-   `VITE_CLERK_PUBLISHABLE_KEY`, `E2E_CLERK_USER_EMAIL`.
+2. ~~**CI secrets.**~~ Resolved 2026-10-31: the five Clerk secrets are set, and CI on GitHub
+   passes `make check` end to end, including both Playwright specs (PR #1, run 41162490309).
+   Two Phase 0 CI bugs surfaced on the first real run and are fixed: `astral-sh/setup-uv@v10`
+   does not exist (pinned to v10.3.0), and codegen ran before dependencies were installed.
 
 ## Carried into later phases
 
