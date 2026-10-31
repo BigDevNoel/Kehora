@@ -202,3 +202,48 @@ async def test_failing_verifier_fails_run_and_never_finishes(
     types = await _types(svc, run)
     assert "check_failed" in types and "run_finished" not in types
     assert types[-1] == "run_failed"
+
+
+async def test_object_projects_use_the_mechanical_agent_behind_the_flag(
+    svc: Services, graph: Any, run: AgentRun, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from tests.agents.test_mechanical import FakeCadSandbox, _design
+
+    monkeypatch.setenv("FEATURE_PHASE1_OBJECTS", "true")
+    assert await execute_run(svc, graph, run.id) == "awaiting_approval"  # fake spec kind: object
+    fake = svc.gateway.adapters["fake"]
+    assert isinstance(fake, FakeAdapter)
+    fake.scripted.extend([_design("BROKEN"), _design("result = Box(20, 20, 20)")])
+    svc.sandbox = FakeCadSandbox()
+    await _decide(svc, run, "approved")
+    assert await execute_run(svc, graph, run.id) == "succeeded"
+
+    events = await _events(svc, run)
+    repair = next(e for e in events if e.type == "repair_attempt")
+    assert repair.node == "mechanical" and repair.payload["attempt"] == 1
+    created = [e.payload["format"] for e in events if e.type == "artifact_created"]
+    assert created == ["py", "step", "stl", "3mf"]
+    assert "check_failed" not in [e.type for e in events]
+    assert events[-1].type == "run_finished"
+    async with svc.sessionmaker() as s:
+        names = {c.name for c in await s.scalars(select(Check).where(Check.run_id == run.id))}
+    assert names == {"script_runs", "solid_valid", "watertight", "dimensions", "printable"}
+
+
+async def test_mechanical_failure_after_repairs_fails_the_run(
+    svc: Services, graph: Any, run: AgentRun, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from kehora_agents.mechanical import MAX_REPAIRS
+    from tests.agents.test_mechanical import FakeCadSandbox, _design
+
+    monkeypatch.setenv("FEATURE_PHASE1_OBJECTS", "true")
+    await execute_run(svc, graph, run.id)
+    fake = svc.gateway.adapters["fake"]
+    assert isinstance(fake, FakeAdapter)
+    fake.scripted.extend([_design("BROKEN")] * (MAX_REPAIRS + 1))
+    svc.sandbox = FakeCadSandbox()
+    await _decide(svc, run, "approved")
+    assert await execute_run(svc, graph, run.id) == "failed"
+    types = await _types(svc, run)
+    assert types.count("repair_attempt") == MAX_REPAIRS
+    assert "check_failed" in types and "run_finished" not in types

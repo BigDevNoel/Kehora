@@ -13,6 +13,7 @@ from kehora_schemas.generated.intake_result_schema import (
     PolicyCategory,
     PolicyDecision,
 )
+from kehora_schemas.generated.mechanical_design_schema import IntendedSize, MechanicalDesign
 from kehora_schemas.generated.printability_schema import (
     Material,
     OrientationResult,
@@ -45,7 +46,9 @@ __all__ = [
     "Constraints",
     "Dimensions",
     "IntakeResult",
+    "IntendedSize",
     "Material",
+    "MechanicalDesign",
     "Money",
     "OrientationResult",
     "PolicyCategory",

@@ -24,6 +24,27 @@ export type PolicyDecision = "allow" | "refuse";
  * via the `definition` "PolicyCategory".
  */
 export type PolicyCategory = "weapons" | "surveillance" | "security_bypass" | "medical_claims";
+export type PrintIssueCode =
+  | "not_watertight"
+  | "exceeds_bed"
+  | "walls_too_thin"
+  | "thin_walls"
+  | "overhangs"
+  | "small_bed_contact";
+export type PrintIssueSeverity = "error" | "warning";
+/**
+ * One-click fix offered for an issue (PRD 8.2).
+ *
+ * This interface was referenced by `PrintabilityReport`'s JSON-Schema
+ * via the `definition` "PrintFix".
+ */
+export type PrintFix =
+  "reorient" | "thicken_walls" | "add_supports" | "split_for_bed" | "repair_mesh";
+/**
+ * This interface was referenced by `PrintabilityReport`'s JSON-Schema
+ * via the `definition` "PrinterTechnology".
+ */
+export type PrinterTechnology = "fdm";
 /**
  * This interface was referenced by `RunEvent`'s JSON-Schema
  * via the `definition` "RunEventType".
@@ -46,6 +67,8 @@ export type RunEventType =
 export interface KehoraSchemas {
   BuildState?: BuildState;
   IntakeResult?: IntakeResult;
+  MechanicalDesign?: MechanicalDesign;
+  Printability?: PrintabilityReport;
   ProjectSpec?: ProjectSpec;
   RunEvent?: RunEvent;
 }
@@ -158,6 +181,135 @@ export interface IntakeResult {
    */
   reason: string;
   policy_category?: PolicyCategory | null;
+}
+/**
+ * Mechanical agent output: a build123d script plus the size it intends to produce, so the CAD verifier can catch scripts that do not build what they meant (PRD 6, ADR-0012).
+ */
+export interface MechanicalDesign {
+  /**
+   * Complete build123d script that assigns the final part to `result`. Millimetres, Z up, resting on z = 0.
+   */
+  script: string;
+  intended_size_mm: IntendedSize;
+  /**
+   * One or two sentences for the build log: design choices and print orientation.
+   */
+  notes: string;
+}
+/**
+ * Bounding box the script should produce along X, Y and Z.
+ */
+export interface IntendedSize {
+  x: number;
+  y: number;
+  z: number;
+}
+/**
+ * Printability engine output for one mesh on one printer and material (PRD 7, PRD 8.2). Shown to the user before download or order; any issue with severity `error` blocks printing.
+ */
+export interface PrintabilityReport {
+  printer_id: string;
+  material_id: string;
+  /**
+   * True when any issue has severity `error`.
+   */
+  blocking: boolean;
+  watertight: boolean;
+  as_given: OrientationResult;
+  recommended: OrientationResult;
+  /**
+   * 2nd-percentile sampled wall thickness; null when not measurable.
+   */
+  min_wall_mm: number | null;
+  /**
+   * Share of sampled surface area thinner than the minimum printable wall.
+   */
+  thin_wall_fraction: number;
+  issues: PrintIssue[];
+}
+/**
+ * The mesh measured in one orientation, resting on the bed at z = 0.
+ *
+ * This interface was referenced by `PrintabilityReport`'s JSON-Schema
+ * via the `definition` "OrientationResult".
+ */
+export interface OrientationResult {
+  rotation_deg: Size3;
+  size_mm: Size31;
+  fits_bed: boolean;
+  /**
+   * True when it fits only after turning 90 degrees on the bed.
+   */
+  rotate_z_90: boolean;
+  /**
+   * Downward-facing area steeper than the material allows, excluding the bed contact.
+   */
+  overhang_area_mm2: number;
+  bed_contact_area_mm2: number;
+}
+/**
+ * Rotation about X, then Y, then Z, applied to the mesh as given.
+ */
+export interface Size3 {
+  x: number;
+  y: number;
+  z: number;
+}
+/**
+ * This interface was referenced by `PrintabilityReport`'s JSON-Schema
+ * via the `definition` "Size3".
+ */
+export interface Size31 {
+  x: number;
+  y: number;
+  z: number;
+}
+/**
+ * This interface was referenced by `PrintabilityReport`'s JSON-Schema
+ * via the `definition` "PrintIssue".
+ */
+export interface PrintIssue {
+  code: PrintIssueCode;
+  severity: PrintIssueSeverity;
+  /**
+   * Plain-language explanation shown to the user.
+   */
+  message: string;
+  fixes?: PrintFix[];
+}
+/**
+ * A printer the user can target. Shipped profiles live in Backend/data/printer-profiles; users can add their own.
+ *
+ * This interface was referenced by `PrintabilityReport`'s JSON-Schema
+ * via the `definition` "PrinterProfile".
+ */
+export interface PrinterProfile {
+  id: string;
+  name: string;
+  technology: PrinterTechnology;
+  build_volume_mm: Size31;
+  nozzle_mm: number;
+  layer_height_mm: number;
+}
+/**
+ * A print material. Shipped materials live in Backend/data/materials.
+ *
+ * This interface was referenced by `PrintabilityReport`'s JSON-Schema
+ * via the `definition` "Material".
+ */
+export interface Material {
+  id: string;
+  name: string;
+  technology: PrinterTechnology;
+  /**
+   * Steepest overhang, measured from vertical, that prints without support.
+   */
+  max_overhang_deg: number;
+  /**
+   * Extrusion lines a wall needs to be sturdy; min wall = lines x nozzle.
+   */
+  min_wall_lines: number;
+  density_g_cm3?: number | null;
 }
 /**
  * One progress event of an agent run (PRD 10). Stored append-only in run_events and streamed over SSE with `id: seq`.

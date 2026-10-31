@@ -10,10 +10,12 @@ from enum import StrEnum
 
 class Flag(StrEnum):
     CREDITS_ENFORCED = "credits_enforced"
+    PHASE1_OBJECTS = "phase1_objects"  # mechanical agent builds `object` projects (ADR-0012)
 
 
 _DEFAULTS: dict[Flag, bool] = {
     Flag.CREDITS_ENFORCED: False,
+    Flag.PHASE1_OBJECTS: False,
 }
 
 
