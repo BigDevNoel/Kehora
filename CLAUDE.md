@@ -67,8 +67,8 @@ enqueue │  │ progress events (Redis → SSE)
 ## Repo layout
 
 Two top-level folders. All frontend work happens in `Frontend/`, all backend work in `Backend/`.
-Only these files and folders sit at the root: `CLAUDE.md`, `docs/`, `Makefile`, `docker-compose.yml`,
-`.github/`, `.gitignore`, `.env.example`.
+Only these files and folders sit at the root: `README.md`, `CLAUDE.md`, `docs/`, `Makefile`,
+`docker-compose.yml`, `.github/`, `.gitignore`, `.env.example`.
 
 ```
 Frontend/                   pnpm workspace (TypeScript)
