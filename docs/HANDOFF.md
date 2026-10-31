@@ -52,10 +52,7 @@ Phase 0 baseline (2026-10-30); current numbers are in `docs/phase-0-report.md`.
 
 ## What is left to close Phase 0
 
-1. **Add the Clerk values as GitHub repo secrets** (owner) so CI can run `make check`:
-   `CLERK_ISSUER`, `CLERK_SECRET_KEY`, `CLERK_WEBHOOK_SIGNING_SECRET`,
-   `VITE_CLERK_PUBLISHABLE_KEY`, `E2E_CLERK_USER_EMAIL`. (The test user signs in through
-   Clerk's testing helper, so CI does not need the password.)
+1. ~~Add the Clerk values as GitHub repo secrets.~~ Done; CI passes `make check` on GitHub.
 2. ~~Write the Phase 0 completion report.~~ Done: `docs/phase-0-report.md`.
 
 Clerk dev instance (2026-10-31): Consumer app "Kehora", email + password sign-in, bot sign-up
