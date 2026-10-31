@@ -1,4 +1,5 @@
-// 3D, schematic and PCB viewers. Phase 0: placeholder; react-three-fiber arrives in phase 1.
+// 3D, schematic and PCB viewers. The 3D model viewer lives in `@kehora/viewer/model` (lazy-load
+// it: it pulls in three.js); this entry stays light for the placeholder.
 
 export interface ViewerPlaceholderProps {
   title?: string;
