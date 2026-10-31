@@ -37,7 +37,12 @@ async def run_case(
     if built is None:
         return None
     result = CaseResult(
-        id=case.id, category=case.category, passed=False, repair_attempts=built.repair_attempts
+        id=case.id,
+        category=case.category,
+        passed=False,
+        repair_attempts=built.repair_attempts,
+        cost_usd_micros=built.cost_usd_micros,
+        model_calls=built.model_calls,
     )
     try:
         if built.script is None:
@@ -89,6 +94,11 @@ def report(suite: str, total: int, results: list[CaseResult]) -> float:
     )
     for cat, flags in sorted(by_cat.items()):
         print(f"  {cat:<11} {sum(flags)}/{len(flags)}")
+    cost = sum(r.cost_usd_micros for r in results) / 1e6
+    if cost and results:
+        repairs = sum(r.repair_attempts for r in results) / len(results)
+        per_case = cost / len(results)
+        print(f"  cost ${cost:.4f} total, ${per_case:.4f}/case, {repairs:.1f} repairs/case")
     return rate
 
 

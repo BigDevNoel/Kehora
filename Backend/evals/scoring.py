@@ -15,6 +15,8 @@ class CaseResult(BaseModel):
     passed: bool
     failures: list[str] = Field(default_factory=list)
     repair_attempts: int = 0
+    cost_usd_micros: int = 0
+    model_calls: int = 0
     duration_s: float = 0.0
 
 
