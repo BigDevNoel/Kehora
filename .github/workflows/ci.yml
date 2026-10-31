@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.3.0  # publishes exact tags only; there is no v10 tag
         with:
           version: "0.12.22"
           enable-cache: true
