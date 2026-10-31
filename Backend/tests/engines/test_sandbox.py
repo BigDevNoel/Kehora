@@ -2,8 +2,8 @@ import docker
 import pytest
 
 from kehora_engines.base import EngineError, SandboxJob, SandboxLimits, SandboxResult
-from kehora_engines.cad import CadEngine, CadInput
 from kehora_engines.echo import IMAGE, EchoEngine, EchoInput, EchoOutput
+from kehora_engines.mesh import MeshEngine, MeshInput
 from kehora_engines_runner.hosted import E2BSandbox
 from kehora_engines_runner.local_docker import LocalDockerSandbox
 from kehora_engines_runner.runner import run_engine
@@ -35,7 +35,7 @@ def test_echo_parse_rejects_failed_run() -> None:
 
 def test_later_phase_engines_are_interface_stubs() -> None:
     with pytest.raises(NotImplementedError, match="phase 1"):
-        CadEngine().build_job(CadInput())
+        MeshEngine().build_job(MeshInput())
 
 
 async def test_policy_rejects_secrets_and_unlisted_hosts(sandbox: LocalDockerSandbox) -> None:

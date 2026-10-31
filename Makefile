@@ -9,7 +9,7 @@ GENERATED := Backend/schemas/kehora_schemas/generated Backend/api/openapi.json \
 	Frontend/packages/types/src/generated Frontend/packages/api-client/src/generated
 gen_sum = find $(GENERATED) -type f -not -path '*__pycache__*' | sort | xargs sha256sum | sha256sum
 
-.PHONY: help dev down logs check check-backend check-frontend e2e services migrate codegen codegen-check evals
+.PHONY: help dev down logs check check-backend check-frontend e2e services migrate codegen codegen-check evals engine-images
 
 help:  ## List targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*## /\t/'
@@ -43,8 +43,11 @@ check-frontend:  ## Frontend lint, types, unit tests
 	$(FE) pnpm typecheck
 	$(FE) pnpm test
 
-services:  ## Start Postgres, Redis, local S3 and the sandbox egress proxy (needed by tests)
+services: engine-images  ## Start Postgres, Redis, local S3 and the sandbox egress proxy (needed by tests)
 	$(COMPOSE) up -d --build --wait postgres redis s3 egress
+
+engine-images:  ## Build the engine sandbox images (tags must match IMAGE in each engine)
+	docker build -q -t kehora/engine-cad:0.13.0 Backend/infra/docker/engines/cad >/dev/null
 
 migrate:  ## alembic upgrade head
 	$(BE) cd db && uv run alembic upgrade head
@@ -68,5 +71,5 @@ e2e:  ## Gate flows against the compose stack (offline LLM): restart system test
 	$(BE) uv run pytest -q -m system tests/system
 	$(FE) pnpm e2e
 
-evals:  ## Agent eval suites (Phase 1 adds the object prompts)
+evals:  ## Agent eval suites (objects: 100 prompts, PRD 8.2 gate 90%)
 	$(BE) uv run python -m evals
