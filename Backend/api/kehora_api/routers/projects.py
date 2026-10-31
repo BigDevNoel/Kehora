@@ -22,7 +22,7 @@ from kehora_common.clock import utcnow
 from kehora_common.events import EXECUTE_RUN_JOB, RUN_QUEUE
 from kehora_common.logging import get_logger
 from kehora_db.enums import ApprovalGate, ApprovalStatus, MemberRole, RunStatus
-from kehora_db.models import AgentRun, Approval, Artifact, Project, ProjectVersion
+from kehora_db.models import AgentRun, Approval, Artifact, Check, Project, ProjectVersion
 
 router = APIRouter(tags=["projects"])
 log = get_logger(__name__)
@@ -59,11 +59,36 @@ class ProjectOut(BaseModel):
 
 class ArtifactOut(BaseModel):
     id: uuid.UUID
+    name: str = Field(description="File name, e.g. part.stl.")
     type: str
     format: str
     size: int
     sha256: str
     created_at: datetime
+
+    @classmethod
+    def of(cls, a: Artifact) -> "ArtifactOut":
+        return cls(
+            id=a.id,
+            name=a.s3_key.rsplit("/", 1)[-1],
+            type=a.type,
+            format=a.format,
+            size=a.size,
+            sha256=a.sha256,
+            created_at=a.created_at,
+        )
+
+
+class CheckOut(BaseModel):
+    """A verifier result on one of the version's artifacts. For `printability/printable` the
+    report is a full PrintabilityReport (Backend/schemas/printability.schema.json)."""
+
+    id: uuid.UUID
+    artifact_id: uuid.UUID | None
+    engine: str
+    name: str
+    status: str
+    report: dict[str, Any]
 
 
 class VersionOut(BaseModel):
@@ -72,6 +97,7 @@ class VersionOut(BaseModel):
     spec: dict[str, Any]
     created_at: datetime
     artifacts: list[ArtifactOut]
+    checks: list[CheckOut] = Field(default_factory=list)
 
 
 class ProjectDetail(ProjectOut):
@@ -216,15 +242,25 @@ async def get_project(project_id: uuid.UUID, auth: Auth, session: Session) -> Pr
     if project.current_version_id:
         version = await session.get(ProjectVersion, project.current_version_id)
         assert version is not None
-        artifacts = await session.scalars(
-            select(Artifact).where(Artifact.version_id == version.id).order_by(Artifact.created_at)
+        artifacts = list(
+            await session.scalars(
+                select(Artifact)
+                .where(Artifact.version_id == version.id)
+                .order_by(Artifact.created_at)
+            )
+        )
+        checks = await session.scalars(
+            select(Check)
+            .where(Check.artifact_id.in_([a.id for a in artifacts]))
+            .order_by(Check.created_at)
         )
         version_out = VersionOut(
             id=version.id,
             number=version.number,
             spec=version.spec,
             created_at=version.created_at,
-            artifacts=[ArtifactOut.model_validate(a, from_attributes=True) for a in artifacts],
+            artifacts=[ArtifactOut.of(a) for a in artifacts],
+            checks=[CheckOut.model_validate(c, from_attributes=True) for c in checks],
         )
     base = _project_out(project, runs[0] if runs else None)
     return ProjectDetail(
