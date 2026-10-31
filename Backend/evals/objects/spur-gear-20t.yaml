@@ -1,0 +1,5 @@
+id: spur-gear-20t
+prompt: "A spur gear with 20 teeth, module 2, 8 mm thick and a 5 mm bore."
+expect:
+  largest_mm: {min: 42, max: 45}
+  smallest_mm: {min: 7.9, max: 8.1}

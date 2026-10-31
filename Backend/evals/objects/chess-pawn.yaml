@@ -1,0 +1,5 @@
+id: chess-pawn
+prompt: "A chess pawn 40 mm tall."
+category: organic
+expect:
+  largest_mm: {min: 38, max: 45}

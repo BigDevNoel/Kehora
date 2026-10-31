@@ -1,0 +1,4 @@
+id: desk-name-sign
+prompt: "A desk name sign 150 mm wide with the name AMARA raised on the front."
+expect:
+  largest_mm: {min: 140, max: 170}

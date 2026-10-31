@@ -1,0 +1,4 @@
+id: zipper-pull
+prompt: "A zipper pull tab 35 mm long with a loop at one end."
+expect:
+  largest_mm: {min: 30, max: 45}

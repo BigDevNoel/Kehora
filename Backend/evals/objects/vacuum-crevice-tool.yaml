@@ -1,0 +1,4 @@
+id: vacuum-crevice-tool
+prompt: "A long crevice tool attachment that fits a 32 mm vacuum hose."
+expect:
+  largest_mm: {min: 150, max: 250}

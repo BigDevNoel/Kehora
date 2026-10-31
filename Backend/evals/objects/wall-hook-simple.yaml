@@ -1,0 +1,5 @@
+id: wall-hook-simple
+prompt: "A coat hook for the wall with two countersunk holes for 4 mm screws, printable without supports."
+expect:
+  largest_mm: {min: 40, max: 120}
+  supports_allowed: false

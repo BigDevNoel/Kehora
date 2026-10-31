@@ -1,0 +1,4 @@
+id: jar-opener-wall
+prompt: "A jar opener that mounts under a cabinet: a tapered V notch that grips lids from 30 to 90 mm across."
+expect:
+  largest_mm: {min: 90, max: 180}

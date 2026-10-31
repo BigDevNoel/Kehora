@@ -1,0 +1,4 @@
+id: pen-holder-hex
+prompt: "A hexagonal pen holder 80 mm tall with 3 mm walls and a closed bottom."
+expect:
+  exact_size: {dims_mm: [80], tolerance_mm: 0.1}

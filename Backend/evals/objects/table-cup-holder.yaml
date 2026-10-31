@@ -1,0 +1,4 @@
+id: table-cup-holder
+prompt: "A cup holder that clips onto a table edge up to 25 mm thick and holds an 80 mm cup."
+expect:
+  largest_mm: {min: 80, max: 160}

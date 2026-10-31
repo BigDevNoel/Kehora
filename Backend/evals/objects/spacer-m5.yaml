@@ -1,0 +1,5 @@
+id: spacer-m5
+prompt: "A round spacer 10 mm long with 12 mm outer diameter for an M5 bolt."
+printer: bambu-a1-mini
+expect:
+  exact_size: {dims_mm: [12, 12, 10], tolerance_mm: 0.1}

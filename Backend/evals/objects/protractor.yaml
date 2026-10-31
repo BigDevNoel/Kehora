@@ -1,0 +1,4 @@
+id: protractor
+prompt: "A 180 degree protractor 100 mm wide with a mark every 10 degrees."
+expect:
+  largest_mm: {min: 100, max: 125}

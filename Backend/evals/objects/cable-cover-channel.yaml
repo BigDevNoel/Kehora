@@ -1,0 +1,4 @@
+id: cable-cover-channel
+prompt: "A 200 mm long section of cable cover channel 20 mm wide with a snap-on lid shape printed closed."
+expect:
+  largest_mm: {min: 195, max: 205}

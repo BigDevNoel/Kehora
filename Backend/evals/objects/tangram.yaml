@@ -1,0 +1,5 @@
+id: tangram
+prompt: "A tangram puzzle: seven pieces laid out inside a 100 mm square frame."
+expect:
+  largest_mm: {min: 100, max: 130}
+  single_body: false

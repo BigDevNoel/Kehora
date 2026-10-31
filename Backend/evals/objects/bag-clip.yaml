@@ -1,0 +1,4 @@
+id: bag-clip
+prompt: "A snack bag clip about 100 mm long with a hinge-free spring design that snaps closed."
+expect:
+  largest_mm: {min: 80, max: 120}

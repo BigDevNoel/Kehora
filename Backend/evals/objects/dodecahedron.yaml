@@ -1,0 +1,4 @@
+id: dodecahedron
+prompt: "A regular dodecahedron about 40 mm across."
+expect:
+  largest_mm: {min: 35, max: 60}

@@ -1,0 +1,4 @@
+id: sticky-note-holder
+prompt: "A holder for a 76 x 76 mm sticky note pad with a pen slot on the side."
+expect:
+  largest_mm: {min: 80, max: 150}

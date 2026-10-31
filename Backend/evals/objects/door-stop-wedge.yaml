@@ -1,0 +1,5 @@
+id: door-stop-wedge
+prompt: "A door stop wedge 120 mm long, rising to 25 mm, with grip ridges on the bottom."
+expect:
+  largest_mm: {min: 118, max: 122}
+  smallest_mm: {min: 20, max: 60}

@@ -1,0 +1,4 @@
+id: fidget-spinner-body
+prompt: "A three-lobed fidget spinner body with a center hole for a 22 mm skateboard bearing."
+expect:
+  largest_mm: {min: 60, max: 100}

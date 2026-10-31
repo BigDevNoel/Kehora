@@ -1,0 +1,4 @@
+id: led-strip-clip
+prompt: "A mounting clip for a 10 mm wide LED strip, fixed with one 3 mm screw."
+expect:
+  largest_mm: {min: 12, max: 40}

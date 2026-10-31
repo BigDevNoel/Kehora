@@ -1,0 +1,5 @@
+id: tealight-holder
+prompt: "A low tea light holder for a 38 mm candle, with a wavy outer edge."
+category: organic
+expect:
+  largest_mm: {min: 50, max: 120}

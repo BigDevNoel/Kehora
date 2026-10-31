@@ -1,0 +1,4 @@
+id: desk-organizer-tray
+prompt: "A desk tray with three compartments for paper clips, erasers and USB sticks, about 150 mm long."
+expect:
+  largest_mm: {min: 130, max: 170}

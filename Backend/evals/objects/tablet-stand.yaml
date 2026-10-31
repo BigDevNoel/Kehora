@@ -1,0 +1,4 @@
+id: tablet-stand
+prompt: "A one-piece stand that holds a 10 inch tablet at 70 degrees in landscape."
+expect:
+  largest_mm: {min: 100, max: 230}

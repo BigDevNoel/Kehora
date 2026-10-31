@@ -1,0 +1,5 @@
+id: plant-pot-saucer
+prompt: "A round saucer 15 mm tall for a 120 mm plant pot."
+expect:
+  largest_mm: {min: 125, max: 150}
+  smallest_mm: {min: 12, max: 18}

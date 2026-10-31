@@ -1,0 +1,4 @@
+id: network-cable-comb
+prompt: "A cable comb that keeps six 6 mm network cables in a neat row."
+expect:
+  largest_mm: {min: 30, max: 100}

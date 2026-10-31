@@ -1,0 +1,4 @@
+id: key-turner-aid
+prompt: "A key turner aid with a large grip that makes a house key easier to turn for someone with arthritis."
+expect:
+  largest_mm: {min: 50, max: 120}

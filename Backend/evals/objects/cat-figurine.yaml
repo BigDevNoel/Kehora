@@ -1,0 +1,5 @@
+id: cat-figurine
+prompt: "A sitting cat figurine about 80 mm tall."
+category: organic
+expect:
+  largest_mm: {min: 70, max: 95}

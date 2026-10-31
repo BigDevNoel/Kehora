@@ -1,0 +1,4 @@
+id: gear-pair-demo
+prompt: "Two meshing spur gears with 15 and 30 teeth, module 1.5, mounted on pegs on one base plate."
+expect:
+  largest_mm: {min: 60, max: 120}

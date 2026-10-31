@@ -1,0 +1,5 @@
+id: vase-flared
+prompt: "A round vase 120 mm tall that widens towards the top."
+category: organic
+expect:
+  largest_mm: {min: 115, max: 125}

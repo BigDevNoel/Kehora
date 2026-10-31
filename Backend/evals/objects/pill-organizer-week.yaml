@@ -1,0 +1,4 @@
+id: pill-organizer-week
+prompt: "A pill organizer with seven compartments labelled M T W T F S S."
+expect:
+  largest_mm: {min: 100, max: 200}

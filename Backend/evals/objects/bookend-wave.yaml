@@ -1,0 +1,5 @@
+id: bookend-wave
+prompt: "An L-shaped bookend 150 mm tall with a decorative wave cut into the upright."
+category: hybrid
+expect:
+  largest_mm: {min: 145, max: 155}

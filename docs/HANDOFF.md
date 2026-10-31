@@ -1,7 +1,8 @@
 # Phase 0 handoff
 
-Last updated: 2026-10-30. Status: **Phase 0 nearly complete; the gate is not yet verified** (the
-Playwright suite has never run, because no Clerk keys are available).
+Last updated: 2026-10-30. Status: **Phase 0 nearly complete; the gate is not yet verified**
+(the Playwright suite has never run, because no Clerk keys are available). Phase 1 backend
+work (CAD, printability, objects evals, mechanical agent) is built and verified.
 
 ## Phases (CLAUDE.md / PRD 15)
 
@@ -59,6 +60,31 @@ There are 7 phases, numbered 0 to 6:
 4. **Add the same values as GitHub repo secrets** so CI can run `make check`.
 5. Write the Phase 0 completion report.
 
+## Phase 1 started early (owner-approved, 2026-10-30)
+
+Backend Phase 1 work started before the Phase 0 Playwright gate ran, because that gate is
+blocked only on Clerk keys. Engine work needs no sign-in. Anything user-facing ships behind a
+feature flag until both gates pass.
+
+- CAD engine: build123d in sandbox image `kehora/engine-cad`, verifier (ADR-0010).
+- Printability engine: bed fit, overhangs, walls, orientation, one-click fixes; printer and
+  material profiles in `Backend/data` (ADR-0011).
+- Objects eval suite: 100 cases, scorer, runner with `reference` and `agent` builders, 11
+  reference solutions.
+- Mechanical agent: design loop with up to 5 repairs, `mechanical` graph node behind
+  `FEATURE_PHASE1_OBJECTS` (ADR-0012).
+
+Downloads finished on 2026-10-31 (CAD image `kehora/engine-cad:0.13.0`, 1.8 GB; numpy and
+trimesh dev deps). Verified then: `make check-backend` passes (187 tests, including every
+sandbox test), `make check-frontend` passes, `make codegen-check` is up to date, and
+`python -m evals objects --builder reference` passes 11 of 11 built cases.
+
+Fixed during verification: a result with no solid (faces only) is now reported as
+"contains no solid" before export instead of a 3MF exporter crash.
+
+Still to do in Phase 1: a real `--builder agent` eval run (needs `ANTHROPIC_API_KEY`, costs
+money; ask the owner first), slicing engine, studio 3D viewer and parameters panel.
+
 ## Decisions waiting for your review
 
 - OpenAI fallback models (`gpt-5.5`, `gpt-5.4-mini`) and their prices (left blank) in
@@ -69,6 +95,9 @@ There are 7 phases, numbered 0 to 6:
   `run_events.node`, artifact type `log`.
 - `Backend/common` is an extra folder not in CLAUDE.md's layout (ADR-0003); update CLAUDE.md if
   accepted.
+- ADR-0010: CAD script contract (`result` variable, mm) and bounding-box-only dimension check.
+- ADR-0011: printability thresholds (1% thin-wall area, 25 mm² overhang, 50 mm² bed contact).
+- ADR-0012: `mechanical` role on the strongest model tier; repairs on the cheaper `repair` tier.
 - The git author is set repo-locally to "Emma" with your email; change it if wrong.
 
 ## Known follow-ups (not Phase 0 blockers)

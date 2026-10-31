@@ -1,0 +1,4 @@
+id: cord-winder
+prompt: "A flat H-shaped cord winder for a 2 m earphone cable."
+expect:
+  largest_mm: {min: 40, max: 100}

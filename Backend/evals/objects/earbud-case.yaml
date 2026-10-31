@@ -1,0 +1,5 @@
+id: earbud-case
+prompt: "A small pill-shaped storage box for earbuds with a separate press-fit lid, both printed together."
+expect:
+  largest_mm: {min: 40, max: 90}
+  single_body: false

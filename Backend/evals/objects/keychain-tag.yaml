@@ -1,0 +1,4 @@
+id: keychain-tag
+prompt: "A keychain tag 50 x 25 mm with a hole for a key ring and the initials E N cut through it."
+expect:
+  exact_size: {dims_mm: [50, 25], tolerance_mm: 0.1}

@@ -1,0 +1,6 @@
+id: ruler-150
+prompt: "A 150 mm ruler 3 mm thick with millimetre markings, printable without supports."
+expect:
+  largest_mm: {min: 150, max: 175}
+  smallest_mm: {min: 2.5, max: 3.5}
+  supports_allowed: false

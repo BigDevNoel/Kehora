@@ -1,0 +1,4 @@
+id: towel-hook-adhesive
+prompt: "A small towel hook with a flat 40 x 40 mm back for double-sided tape."
+expect:
+  exact_size: {dims_mm: [40, 40], tolerance_mm: 0.1}

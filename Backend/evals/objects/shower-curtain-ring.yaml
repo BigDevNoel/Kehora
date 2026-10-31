@@ -1,0 +1,4 @@
+id: shower-curtain-ring
+prompt: "A shower curtain ring 50 mm across with a snap opening."
+expect:
+  largest_mm: {min: 45, max: 65}

@@ -1,0 +1,4 @@
+id: laptop-riser-foot
+prompt: "One of a pair of feet that raises the back edge of a laptop by 50 mm."
+expect:
+  largest_mm: {min: 50, max: 120}

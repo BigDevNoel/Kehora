@@ -1,0 +1,5 @@
+id: phone-stand-basic
+prompt: "A simple desk stand for a 6.5 inch phone, leaning back at about 60 degrees, that works in portrait and landscape and prints without supports."
+expect:
+  largest_mm: {min: 70, max: 150}
+  supports_allowed: false

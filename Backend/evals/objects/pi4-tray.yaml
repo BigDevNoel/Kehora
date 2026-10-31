@@ -1,0 +1,4 @@
+id: pi4-tray
+prompt: "A simple open-top tray for a Raspberry Pi 4 board (85 x 56 mm) with four standoffs for M2.5 screws."
+expect:
+  largest_mm: {min: 85, max: 115}

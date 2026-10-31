@@ -1,0 +1,4 @@
+id: battery-organizer
+prompt: "A wall-mounted organizer for eight AA and eight AAA batteries."
+expect:
+  largest_mm: {min: 60, max: 180}

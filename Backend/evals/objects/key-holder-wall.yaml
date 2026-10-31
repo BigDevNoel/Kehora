@@ -1,0 +1,4 @@
+id: key-holder-wall
+prompt: "A wall-mounted key holder with five hooks in a row and two screw holes."
+expect:
+  largest_mm: {min: 100, max: 250}

@@ -1,0 +1,4 @@
+id: bottle-cap-28mm
+prompt: "A screw cap for a bottle with a 28 mm threaded neck."
+expect:
+  largest_mm: {min: 28, max: 40}

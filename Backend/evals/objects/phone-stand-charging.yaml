@@ -1,0 +1,4 @@
+id: phone-stand-charging
+prompt: "A phone stand with a slot at the bottom so the charging cable can pass through while the phone rests on it."
+expect:
+  largest_mm: {min: 60, max: 160}

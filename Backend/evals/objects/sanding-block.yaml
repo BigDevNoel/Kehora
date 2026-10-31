@@ -1,0 +1,4 @@
+id: sanding-block
+prompt: "A hand sanding block 110 x 60 mm with clamps at each end that hold a strip of sandpaper."
+expect:
+  largest_mm: {min: 105, max: 140}

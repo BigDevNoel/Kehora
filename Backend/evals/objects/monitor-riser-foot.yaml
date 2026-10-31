@@ -1,0 +1,4 @@
+id: monitor-riser-foot
+prompt: "One foot for a monitor riser shelf: a block 60 x 60 x 40 mm with a 20 mm deep slot that holds an 18 mm thick board."
+expect:
+  exact_size: {dims_mm: [60, 60, 40], tolerance_mm: 0.1}

@@ -1,0 +1,5 @@
+id: drip-irrigation-stake
+prompt: "A ground stake 120 mm long that holds a 4 mm drip irrigation tube at the top."
+material: petg
+expect:
+  largest_mm: {min: 110, max: 140}
