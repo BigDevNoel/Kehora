@@ -4,7 +4,7 @@ Oct 29, 2026 · @Emma
 
 ## 1. Overview
 
-Forge (working name) lets anyone describe a physical thing in plain language and get it designed, verified and made: 3D-printed objects, electronics with firmware, the enclosure that fits them, laser-cut parts, and the app that controls the device. It is to hardware what AI app builders are to software.
+Kehora lets anyone describe a physical thing in plain language and get it designed, verified and made: 3D-printed objects, electronics with firmware, the enclosure that fits them, laser-cut parts, and the app that controls the device. It is to hardware what AI app builders are to software.
 
 **Problem.** Making a physical product today needs CAD skills, electronics knowledge, firmware coding, and access to printers and parts suppliers. Each is a separate expert or tool, so most people with an idea never build it.
 
@@ -482,7 +482,7 @@ Revenue comes from five streams; all prices below are starting assumptions to te
 Two top-level folders: `Frontend/` for all frontend work (pnpm workspace, TypeScript) and `Backend/` for all backend work (uv workspace, Python). They talk only through the HTTP API and generated types; nothing imports across them.
 
 ```
-forge/
+kehora/
   Frontend/
     apps/
       studio/        React + Vite studio

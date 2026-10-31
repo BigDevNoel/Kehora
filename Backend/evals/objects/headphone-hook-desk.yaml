@@ -1,0 +1,4 @@
+id: headphone-hook-desk
+prompt: "A headphone hook that clamps onto a desk up to 30 mm thick."
+expect:
+  largest_mm: {min: 60, max: 160}

@@ -1,0 +1,4 @@
+id: nozzle-storage
+prompt: "A storage block for twelve 3D printer nozzles with M6 threads."
+expect:
+  largest_mm: {min: 40, max: 120}

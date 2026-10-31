@@ -1,0 +1,5 @@
+id: vacuum-hose-adapter
+prompt: "A vacuum hose adapter from 35 mm outer diameter on one end to a 58 mm socket on the other."
+material: abs
+expect:
+  largest_mm: {min: 40, max: 130}

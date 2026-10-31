@@ -1,0 +1,4 @@
+id: bench-dog
+prompt: "A bench dog for a workbench with 20 mm holes, 60 mm long with a wider head."
+expect:
+  largest_mm: {min: 55, max: 80}

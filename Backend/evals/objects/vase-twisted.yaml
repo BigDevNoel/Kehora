@@ -1,0 +1,5 @@
+id: vase-twisted
+prompt: "A twisted hexagonal vase 150 mm tall with 2 mm walls and a closed bottom."
+category: organic
+expect:
+  largest_mm: {min: 145, max: 155}

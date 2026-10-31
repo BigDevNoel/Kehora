@@ -1,0 +1,4 @@
+id: allen-key-holder
+prompt: "A holder for a set of nine metric hex keys from 1.5 to 10 mm."
+expect:
+  largest_mm: {min: 50, max: 160}

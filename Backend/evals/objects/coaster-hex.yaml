@@ -1,0 +1,6 @@
+id: coaster-hex
+prompt: "A hexagonal drink coaster 100 mm across with a raised rim, printable without supports."
+expect:
+  largest_mm: {min: 95, max: 105}
+  smallest_mm: {min: 3, max: 10}
+  supports_allowed: false

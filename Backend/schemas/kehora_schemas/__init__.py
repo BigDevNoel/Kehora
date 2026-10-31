@@ -13,6 +13,19 @@ from kehora_schemas.generated.intake_result_schema import (
     PolicyCategory,
     PolicyDecision,
 )
+from kehora_schemas.generated.mechanical_design_schema import IntendedSize, MechanicalDesign
+from kehora_schemas.generated.printability_schema import (
+    Material,
+    OrientationResult,
+    PrintabilityReport,
+    PrinterProfile,
+    PrinterTechnology,
+    PrintFix,
+    PrintIssue,
+    PrintIssueCode,
+    PrintIssueSeverity,
+    Size3,
+)
 from kehora_schemas.generated.project_spec_schema import (
     ComponentRequirement,
     Constraints,
@@ -33,11 +46,23 @@ __all__ = [
     "Constraints",
     "Dimensions",
     "IntakeResult",
+    "IntendedSize",
+    "Material",
+    "MechanicalDesign",
     "Money",
+    "OrientationResult",
     "PolicyCategory",
     "PolicyDecision",
+    "PrintFix",
+    "PrintIssue",
+    "PrintIssueCode",
+    "PrintIssueSeverity",
+    "PrintabilityReport",
+    "PrinterProfile",
+    "PrinterTechnology",
     "ProjectKind",
     "ProjectSpec",
     "RunEvent",
     "RunEventType",
+    "Size3",
 ]

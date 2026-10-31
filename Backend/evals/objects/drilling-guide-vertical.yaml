@@ -1,0 +1,4 @@
+id: drilling-guide-vertical
+prompt: "A drilling guide block 30 mm tall that keeps a 6 mm drill bit vertical."
+expect:
+  exact_size: {dims_mm: [30], tolerance_mm: 0.1}

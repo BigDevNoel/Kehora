@@ -1,0 +1,4 @@
+id: cable-label-tag
+prompt: "A cable label tag that clips onto a 5 mm cable and has a flat 25 x 10 mm face for writing."
+expect:
+  largest_mm: {min: 20, max: 45}

@@ -1,0 +1,4 @@
+id: spool-holder
+prompt: "A filament spool spindle for spools with 52 mm center holes."
+expect:
+  largest_mm: {min: 50, max: 160}

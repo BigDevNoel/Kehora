@@ -1,0 +1,4 @@
+id: spice-rack-shelf
+prompt: "A small wall shelf 200 mm wide for spice jars 45 mm in diameter, with a front lip so they cannot slide off."
+expect:
+  largest_mm: {min: 190, max: 210}

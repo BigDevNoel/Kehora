@@ -1,0 +1,5 @@
+id: plant-label-stake
+prompt: "A plant label stake 150 mm long with a flat area at the top to write on."
+material: petg
+expect:
+  largest_mm: {min: 140, max: 160}

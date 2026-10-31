@@ -1,0 +1,4 @@
+id: whistle
+prompt: "A whistle that prints in one piece without a pea."
+expect:
+  largest_mm: {min: 30, max: 80}

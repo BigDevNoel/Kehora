@@ -1,0 +1,4 @@
+id: v-belt-pulley
+prompt: "A V-belt pulley 50 mm in diameter with an 8 mm bore and a hole for a set screw."
+expect:
+  largest_mm: {min: 48, max: 55}

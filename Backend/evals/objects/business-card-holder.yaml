@@ -1,0 +1,4 @@
+id: business-card-holder
+prompt: "A business card holder that holds a stack of standard 85 x 55 mm cards at a slight backward angle."
+expect:
+  largest_mm: {min: 85, max: 140}

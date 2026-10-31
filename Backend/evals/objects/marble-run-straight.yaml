@@ -1,0 +1,4 @@
+id: marble-run-straight
+prompt: "A straight marble run track piece 100 mm long for 16 mm marbles, with connectors at both ends."
+expect:
+  largest_mm: {min: 100, max: 130}

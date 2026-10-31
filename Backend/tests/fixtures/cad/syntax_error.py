@@ -1,0 +1,3 @@
+from build123d import Box
+
+result = Box(10, 10

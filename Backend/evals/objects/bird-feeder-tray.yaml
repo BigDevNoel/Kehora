@@ -1,0 +1,5 @@
+id: bird-feeder-tray
+prompt: "A bird feeder tray 150 x 150 mm with drainage holes and four corner posts with holes for hanging cords."
+material: petg
+expect:
+  exact_size: {dims_mm: [150, 150], tolerance_mm: 0.5}

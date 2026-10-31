@@ -1,0 +1,4 @@
+id: controller-wall-mount
+prompt: "A wall mount that holds a game controller by its grips."
+expect:
+  largest_mm: {min: 50, max: 160}

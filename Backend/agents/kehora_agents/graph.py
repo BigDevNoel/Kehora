@@ -1,7 +1,7 @@
-"""Phase 0 build graph (PRD 6, reduced):
+"""Build graph (PRD 6, reduced):
 
     intake -> spec -> request_spec_approval -> spec_gate -(approved)-> create_version
-           -> engine (echo, in the sandbox) -> finish
+           -> mechanical (object projects, flag PHASE1_OBJECTS) | engine (echo) -> finish
 
 State is `BuildState` (Backend/schemas). Nodes return plain JSON updates so checkpoints hold only
 JSON values. Every node emits node_started / node_finished. A node may re-run after a worker
@@ -19,8 +19,10 @@ from langgraph.types import interrupt
 from sqlalchemy import func, select
 
 from kehora_agents import prompts
+from kehora_agents.mechanical import design_part
 from kehora_agents.services import Services, emit, set_status, usage_sink
 from kehora_common.clock import utcnow
+from kehora_common.flags import Flag, is_enabled
 from kehora_db.enums import ApprovalGate, ApprovalStatus, RunStatus
 from kehora_db.models import AgentRun, Approval, Artifact, Check, Project, ProjectVersion
 from kehora_engines.echo import EchoEngine, EchoInput
@@ -30,9 +32,11 @@ from kehora_schemas import (
     ArtifactRef,
     ArtifactType,
     BuildState,
+    CheckResult,
     CheckStatus,
     IntakeResult,
     PolicyDecision,
+    ProjectKind,
     ProjectSpec,
     RunEventType,
 )
@@ -137,18 +141,21 @@ def build_graph(svc: Services, checkpointer: Any) -> CompiledStateGraph[Any, Any
             version_id = run.version_id
         return {"version_id": str(version_id)}
 
-    async def engine(state: BuildState) -> dict[str, Any]:
-        assert state.spec is not None and state.version_id is not None
-        echo = EchoEngine()
-        inp = EchoInput(
-            message=f"{state.spec.title}\n\n{state.spec.summary}",
-            delay_s=svc.settings.echo_delay_s,
-        )
-        result = await run_engine(svc.sandbox, echo, inp)
-        key = f"projects/{state.project_id}/versions/{state.version_id}/echo/echo.txt"
-        stored = await asyncio.to_thread(
-            svc.storage.put_bytes, key, result.output.text.encode(), "text/plain"
-        )
+    async def store(
+        state: BuildState,
+        node: str,
+        name: str,
+        data: bytes,
+        kind: tuple[ArtifactType, str, str],
+        checks: list[CheckResult],
+        metadata: dict[str, Any],
+    ) -> ArtifactRef:
+        """Upload one output, record its artifact and check rows, and emit their events.
+        Idempotent on re-run: the S3 key is deterministic and the artifact is looked up first."""
+        assert state.version_id is not None
+        type_, fmt, content_type = kind
+        key = f"projects/{state.project_id}/versions/{state.version_id}/{node}/{name}"
+        stored = await asyncio.to_thread(svc.storage.put_bytes, key, data, content_type)
         async with svc.sessionmaker() as session, session.begin():
             artifact = await session.scalar(
                 select(Artifact).where(
@@ -158,17 +165,17 @@ def build_graph(svc: Services, checkpointer: Any) -> CompiledStateGraph[Any, Any
             if artifact is None:
                 artifact = Artifact(
                     version_id=state.version_id,
-                    type=ArtifactType.log.value,
-                    format="txt",
+                    type=type_.value,
+                    format=fmt,
                     s3_key=key,
                     sha256=stored.sha256,
                     size=stored.size,
-                    metadata_={"engine": echo.name, "duration_ms": result.result.duration_ms},
+                    metadata_=metadata,
                 )
                 session.add(artifact)
                 await session.flush()
             artifact_id = artifact.id
-            for check in result.checks:
+            for check in checks:
                 session.add(
                     Check(
                         run_id=state.run_id,
@@ -181,27 +188,102 @@ def build_graph(svc: Services, checkpointer: Any) -> CompiledStateGraph[Any, Any
                 )
         ref = ArtifactRef(
             artifact_id=artifact_id,
-            type=ArtifactType.log,
-            format="txt",
+            type=type_,
+            format=fmt,
             s3_key=key,
             sha256=stored.sha256,
             size=stored.size,
         )
         await emit(
-            svc, state.run_id, RunEventType.artifact_created, ref.model_dump(mode="json"), "engine"
+            svc, state.run_id, RunEventType.artifact_created, ref.model_dump(mode="json"), node
         )
-        for check in result.checks:
+        await emit_checks(state, node, checks)
+        return ref
+
+    async def emit_checks(state: BuildState, node: str, checks: list[CheckResult]) -> None:
+        for check in checks:
             kind = {
                 CheckStatus.pass_: RunEventType.check_passed,
                 CheckStatus.warn: RunEventType.check_warned,
                 CheckStatus.fail: RunEventType.check_failed,
             }[check.status]
-            await emit(svc, state.run_id, kind, check.model_dump(mode="json"), "engine")
+            await emit(svc, state.run_id, kind, check.model_dump(mode="json"), node)
+
+    async def engine(state: BuildState) -> dict[str, Any]:
+        assert state.spec is not None and state.version_id is not None
+        echo = EchoEngine()
+        inp = EchoInput(
+            message=f"{state.spec.title}\n\n{state.spec.summary}",
+            delay_s=svc.settings.echo_delay_s,
+        )
+        result = await run_engine(svc.sandbox, echo, inp)
+        ref = await store(
+            state,
+            "engine",
+            "echo.txt",
+            result.output.text.encode(),
+            (ArtifactType.log, "txt", "text/plain"),
+            result.checks,
+            {"engine": echo.name, "duration_ms": result.result.duration_ms},
+        )
         if any(c.status == CheckStatus.fail for c in result.checks):
             raise VerificationFailed(f"{echo.name} verifier failed")
         return {
             "artifacts": [ref.model_dump(mode="json")],
             "checks": [c.model_dump(mode="json") for c in result.checks],
+        }
+
+    async def mechanical(state: BuildState) -> dict[str, Any]:
+        assert state.spec is not None and state.version_id is not None
+
+        async def on_repair(attempt: int, failures: list[str]) -> None:
+            await emit(
+                svc,
+                state.run_id,
+                RunEventType.repair_attempt,
+                {"attempt": attempt, "failures": failures[:10]},
+                "mechanical",
+            )
+
+        result = await design_part(
+            svc.gateway,
+            svc.sandbox,
+            state.spec,
+            on_usage=usage_sink(svc, state.run_id),
+            on_repair=on_repair,
+        )
+        final = result.final
+        meta = {"engine": "cad", "repair_attempts": result.repair_attempts}
+        cad_checks = [c for c in final.checks if c.engine == "cad"]
+        print_checks = [c for c in final.checks if c.engine != "cad"]
+        files = final.cad.files
+        refs = [
+            await store(
+                state,
+                "mechanical",
+                "script.py",
+                final.design.script.encode(),
+                (ArtifactType.model, "py", "text/x-python"),
+                [] if files else final.checks,  # never built: its checks belong to the script
+                meta,
+            )
+        ]
+        for name, kind, checks in (
+            ("part.step", (ArtifactType.model, "step", "model/step"), cad_checks),
+            ("part.stl", (ArtifactType.mesh, "stl", "model/stl"), print_checks),
+            ("part.3mf", (ArtifactType.mesh, "3mf", "model/3mf"), []),
+        ):
+            if name in files:
+                refs.append(await store(state, "mechanical", name, files[name], kind, checks, meta))
+        if not result.ok:
+            raise VerificationFailed(
+                f"mechanical design failed after {result.repair_attempts} repairs: "
+                + "; ".join(final.failures)[:500]
+            )
+        return {
+            "artifacts": [r.model_dump(mode="json") for r in refs],
+            "checks": [c.model_dump(mode="json") for c in final.checks],
+            "repair_attempts": result.repair_attempts,
         }
 
     async def finish(state: BuildState) -> dict[str, Any]:
@@ -222,12 +304,19 @@ def build_graph(svc: Services, checkpointer: Any) -> CompiledStateGraph[Any, Any
     def after_gate(state: BuildState) -> str:
         return "create_version" if state.spec_approved else END
 
+    def build_step(state: BuildState) -> str:
+        assert state.spec is not None
+        if is_enabled(Flag.PHASE1_OBJECTS) and state.spec.kind == ProjectKind.object:
+            return "mechanical"
+        return "engine"
+
     g = StateGraph(BuildState)
     for name, fn in [
         ("intake", intake),
         ("spec", spec),
         ("create_version", create_version),
         ("engine", engine),
+        ("mechanical", mechanical),
     ]:
         g.add_node(name, _tracked(svc, name, fn))
     g.add_node("request_spec_approval", request_spec_approval)
@@ -238,7 +327,8 @@ def build_graph(svc: Services, checkpointer: Any) -> CompiledStateGraph[Any, Any
     g.add_edge("spec", "request_spec_approval")
     g.add_edge("request_spec_approval", "spec_gate")
     g.add_conditional_edges("spec_gate", after_gate, ["create_version", END])
-    g.add_edge("create_version", "engine")
+    g.add_conditional_edges("create_version", build_step, ["mechanical", "engine"])
     g.add_edge("engine", "finish")
+    g.add_edge("mechanical", "finish")
     g.add_edge("finish", END)
     return g.compile(checkpointer=checkpointer)

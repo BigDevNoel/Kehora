@@ -1,0 +1,4 @@
+id: drawer-pull-handle
+prompt: "A drawer pull handle with 96 mm hole spacing for M4 screws."
+expect:
+  largest_mm: {min: 100, max: 140}

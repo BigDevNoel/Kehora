@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mechanical_design.schema.json",
+  "title": "MechanicalDesign",
+  "description": "Mechanical agent output: a build123d script plus the size it intends to produce, so the CAD verifier can catch scripts that do not build what they meant (PRD 6, ADR-0012).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["script", "intended_size_mm", "notes"],
+  "properties": {
+    "script": { "type": "string", "minLength": 1, "description": "Complete build123d script that assigns the final part to `result`. Millimetres, Z up, resting on z = 0." },
+    "intended_size_mm": {
+      "title": "IntendedSize",
+      "description": "Bounding box the script should produce along X, Y and Z.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "number", "exclusiveMinimum": 0 },
+        "y": { "type": "number", "exclusiveMinimum": 0 },
+        "z": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "notes": { "type": "string", "description": "One or two sentences for the build log: design choices and print orientation." }
+  }
+}

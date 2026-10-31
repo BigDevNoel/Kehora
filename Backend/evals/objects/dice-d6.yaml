@@ -1,0 +1,4 @@
+id: dice-d6
+prompt: "A six-sided die 16 mm across with rounded edges and recessed pips."
+expect:
+  exact_size: {dims_mm: [16, 16, 16], tolerance_mm: 0.2}

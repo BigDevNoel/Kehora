@@ -1,0 +1,4 @@
+id: pencil-cup-round
+prompt: "A round pencil cup, 70 mm in diameter and 100 mm tall, with a solid base."
+expect:
+  exact_size: {dims_mm: [100, 70, 70], tolerance_mm: 0.1}

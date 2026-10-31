@@ -1,0 +1,6 @@
+id: pla
+name: PLA
+technology: fdm
+max_overhang_deg: 50
+min_wall_lines: 2
+density_g_cm3: 1.24

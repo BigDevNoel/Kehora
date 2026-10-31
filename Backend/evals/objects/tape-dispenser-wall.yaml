@@ -1,0 +1,4 @@
+id: tape-dispenser-wall
+prompt: "A wall dispenser for a roll of masking tape with a 76 mm core."
+expect:
+  largest_mm: {min: 85, max: 150}

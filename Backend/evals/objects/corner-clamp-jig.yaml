@@ -1,0 +1,4 @@
+id: corner-clamp-jig
+prompt: "A 90 degree corner jig for gluing two 18 mm boards together."
+expect:
+  largest_mm: {min: 60, max: 160}

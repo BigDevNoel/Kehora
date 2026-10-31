@@ -1,0 +1,4 @@
+id: shelf-bracket
+prompt: "An L-shaped shelf bracket with 100 mm arms, a diagonal brace, and two screw holes on each arm."
+expect:
+  largest_mm: {min: 95, max: 110}

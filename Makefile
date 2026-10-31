@@ -9,7 +9,7 @@ GENERATED := Backend/schemas/kehora_schemas/generated Backend/api/openapi.json \
 	Frontend/packages/types/src/generated Frontend/packages/api-client/src/generated
 gen_sum = find $(GENERATED) -type f -not -path '*__pycache__*' | sort | xargs sha256sum | sha256sum
 
-.PHONY: help dev down logs check check-backend check-frontend e2e services migrate codegen codegen-check evals
+.PHONY: help dev down logs check check-backend check-frontend e2e services migrate deps codegen codegen-check evals engine-images
 
 help:  ## List targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*## /\t/'
@@ -43,13 +43,20 @@ check-frontend:  ## Frontend lint, types, unit tests
 	$(FE) pnpm typecheck
 	$(FE) pnpm test
 
-services:  ## Start Postgres, Redis, local S3 and the sandbox egress proxy (needed by tests)
+services: engine-images  ## Start Postgres, Redis, local S3 and the sandbox egress proxy (needed by tests)
 	$(COMPOSE) up -d --build --wait postgres redis s3 egress
+
+engine-images:  ## Build the engine sandbox images (tags must match IMAGE in each engine)
+	docker build -q -t kehora/engine-cad:0.13.0 Backend/infra/docker/engines/cad >/dev/null
 
 migrate:  ## alembic upgrade head
 	$(BE) cd db && uv run alembic upgrade head
 
-codegen:  ## Regenerate Pydantic models, TS types and API client from Backend/schemas + OpenAPI
+deps:  ## Install backend and frontend dependencies from the lock files
+	$(BE) uv sync --frozen -q
+	$(FE) pnpm install --frozen-lockfile --silent
+
+codegen: deps  ## Regenerate Pydantic models, TS types and API client from Backend/schemas + OpenAPI
 	$(BE) bash scripts/codegen_py.sh
 	$(BE) uv run python scripts/export_openapi.py
 	$(FE) cd packages/types && node scripts/codegen.mjs ../../../Backend/schemas
@@ -57,7 +64,9 @@ codegen:  ## Regenerate Pydantic models, TS types and API client from Backend/sc
 
 codegen-check:  ## Fail if generated code is stale (regenerates, compares checksums)
 	@before=$$($(gen_sum)); \
-	$(MAKE) -s codegen >/dev/null 2>&1; \
+	if ! out=$$($(MAKE) -s codegen 2>&1); then \
+		echo "$$out"; echo "codegen failed (see above)"; exit 1; \
+	fi; \
 	after=$$($(gen_sum)); \
 	if [ "$$before" != "$$after" ]; then \
 		echo "Generated code was stale and has been regenerated; review and commit it."; exit 1; \
@@ -68,5 +77,5 @@ e2e:  ## Gate flows against the compose stack (offline LLM): restart system test
 	$(BE) uv run pytest -q -m system tests/system
 	$(FE) pnpm e2e
 
-evals:  ## Agent eval suites (Phase 1 adds the object prompts)
+evals:  ## Agent eval suites (objects: 100 prompts, PRD 8.2 gate 90%)
 	$(BE) uv run python -m evals

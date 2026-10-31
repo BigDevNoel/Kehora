@@ -1,0 +1,5 @@
+id: chair-leg-cap
+prompt: "A round foot cap that fits over a chair leg 22 mm in diameter."
+material: tpu
+expect:
+  largest_mm: {min: 22, max: 40}

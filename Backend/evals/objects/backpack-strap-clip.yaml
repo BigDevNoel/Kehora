@@ -1,0 +1,4 @@
+id: backpack-strap-clip
+prompt: "A replacement belt loop clip for a backpack strap 25 mm wide."
+expect:
+  largest_mm: {min: 25, max: 60}

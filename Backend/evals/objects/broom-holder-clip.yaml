@@ -1,0 +1,4 @@
+id: broom-holder-clip
+prompt: "A wall clip that holds a broom handle 25 mm in diameter."
+expect:
+  largest_mm: {min: 25, max: 80}

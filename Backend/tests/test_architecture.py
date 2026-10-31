@@ -18,6 +18,8 @@ def _imports(path: Path) -> set[str]:
             names.update(a.name for a in node.names)
         elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
             names.add(node.module)
+            # `from google import genai` imports the module google.genai.
+            names.update(f"{node.module}.{a.name}" for a in node.names)
     return names
 
 
@@ -44,6 +46,12 @@ def test_llm_sdks_only_imported_in_llm_package() -> None:
 
 def test_payment_sdks_only_imported_in_payment_adapters() -> None:
     assert _violations(PAYMENT_SDKS, BACKEND / "api" / "kehora_api" / "payments" / "adapters") == []
+
+
+def test_import_check_sees_from_imports(tmp_path: Path) -> None:
+    probe = tmp_path / "probe.py"
+    probe.write_text("from google import genai\n", encoding="utf-8")
+    assert "google.genai" in _imports(probe)
 
 
 def test_backend_never_references_frontend() -> None:

@@ -143,7 +143,10 @@ class Gateway:
         try:
             return output.model_validate(json.loads(completion.text))
         except (json.JSONDecodeError, ValidationError) as exc:
-            raise OutputValidationError(f"{output.__name__}: {exc}") from exc
+            # The stop reason tells a cut-off reply (token limit) from a malformed one.
+            raise OutputValidationError(
+                f"{output.__name__} (stop_reason={completion.stop_reason}): {exc}"
+            ) from exc
 
     async def tool_call(
         self,
@@ -187,6 +190,10 @@ def build_gateway(settings: Settings, extra_adapters: dict[str, Any] | None = No
             from kehora_llm.adapters.openai_adapter import OpenAIAdapter
 
             adapters[provider] = OpenAIAdapter(settings.openai_api_key.get_secret_value())
+        elif provider == "gemini" and settings.gemini_api_key:
+            from kehora_llm.adapters.gemini_adapter import GeminiAdapter
+
+            adapters[provider] = GeminiAdapter(settings.gemini_api_key.get_secret_value())
         elif provider == "fake":
             from kehora_llm.adapters.fake import FakeAdapter
 
@@ -195,6 +202,6 @@ def build_gateway(settings: Settings, extra_adapters: dict[str, Any] | None = No
     if not adapters:
         raise FatalLLMError(
             f"profile {settings.llm_routing_profile!r} has no usable provider; set "
-            "ANTHROPIC_API_KEY or OPENAI_API_KEY, or LLM_ROUTING_PROFILE=test"
+            "GEMINI_API_KEY, ANTHROPIC_API_KEY or OPENAI_API_KEY, or LLM_ROUTING_PROFILE=test"
         )
     return Gateway(routing, adapters)

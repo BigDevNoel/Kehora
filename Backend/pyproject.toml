@@ -18,6 +18,8 @@ dev = [
     "httpx==0.28.1",
     "boto3-stubs[s3]",
     "types-jsonschema",
+    "numpy==2.5.4",
+    "trimesh==5.1.1",
 ]
 
 [tool.uv]
@@ -39,6 +41,8 @@ kehora-agents = { workspace = true }
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+# Fixture scripts run inside engine sandboxes; some are deliberately broken.
+extend-exclude = ["tests/fixtures"]
 
 [tool.ruff.format]
 line-ending = "lf"
@@ -59,7 +63,8 @@ known-first-party = ["kehora_*"]
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
-exclude = ["^tests/fixtures/"]
+# Sandbox-only scripts: fixtures and eval reference solutions (hyphenated, not modules).
+exclude = ["^tests/fixtures/", "^evals/objects/reference/"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -78,8 +83,9 @@ markers = [
 [tool.coverage.run]
 branch = true
 source = ["kehora_common", "kehora_schemas", "kehora_db", "kehora_api", "kehora_llm", "kehora_engines", "kehora_engines_runner", "kehora_agents"]
-omit = ["*/alembic/*", "*/generated/*"]
+# harness.py files run only inside sandbox images; the docker tests exercise them.
+omit = ["*/alembic/*", "*/generated/*", "*/kehora_engines/*/harness.py"]
 
 [[tool.mypy.overrides]]
-module = ["alembic.*", "botocore.*", "boto3.*", "arq.*", "svix.*", "docker.*"]
+module = ["alembic.*", "botocore.*", "boto3.*", "arq.*", "svix.*", "docker.*", "build123d", "trimesh"]
 ignore_missing_imports = true

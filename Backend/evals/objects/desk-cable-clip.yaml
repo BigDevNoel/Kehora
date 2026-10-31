@@ -1,0 +1,5 @@
+id: desk-cable-clip
+prompt: "A cable clip that sticks under a desk edge with tape and holds three 6 mm USB cables side by side, printable without supports."
+expect:
+  largest_mm: {min: 20, max: 80}
+  supports_allowed: false

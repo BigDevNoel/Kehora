@@ -1,0 +1,5 @@
+id: lamp-shade-pattern
+prompt: "A lamp shade 150 mm across with a 40 mm hole at the top for an E27 fitting and a pattern of holes."
+category: hybrid
+expect:
+  largest_mm: {min: 145, max: 160}

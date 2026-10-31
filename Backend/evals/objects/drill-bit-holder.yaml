@@ -1,0 +1,4 @@
+id: drill-bit-holder
+prompt: "A drill bit holder block with ten holes for bits from 1 to 10 mm, each labelled with its size."
+expect:
+  largest_mm: {min: 60, max: 200}

@@ -1,0 +1,4 @@
+id: usb-stick-holder
+prompt: "A desk holder for eight USB sticks and four SD cards."
+expect:
+  largest_mm: {min: 50, max: 160}

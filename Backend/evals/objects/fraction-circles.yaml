@@ -1,0 +1,5 @@
+id: fraction-circles
+prompt: "A fraction teaching set: a tray holding a 100 mm disc cut into four quarter pieces."
+expect:
+  largest_mm: {min: 100, max: 130}
+  single_body: false

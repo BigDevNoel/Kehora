@@ -9,6 +9,8 @@ PROMPTS_DIR = Path(__file__).resolve().parents[1] / "prompts"
 
 INTAKE = ("intake", 1)
 SPEC = ("spec", 1)
+MECHANICAL = ("mechanical", 1)
+MECHANICAL_REPAIR = ("mechanical_repair", 1)
 
 
 @cache

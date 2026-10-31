@@ -1,0 +1,5 @@
+id: hose-hanger
+prompt: "A wall-mounted garden hose hanger that holds a coiled hose, with three screw holes."
+material: petg
+expect:
+  largest_mm: {min: 120, max: 250}

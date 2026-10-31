@@ -1,0 +1,4 @@
+id: remote-battery-cover
+prompt: "A replacement battery cover for a TV remote, 45 x 25 mm with a snap tab at one end."
+expect:
+  largest_mm: {min: 44, max: 52}

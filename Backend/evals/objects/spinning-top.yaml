@@ -1,0 +1,4 @@
+id: spinning-top
+prompt: "A spinning top about 50 mm across with a handle to twist."
+expect:
+  largest_mm: {min: 40, max: 70}

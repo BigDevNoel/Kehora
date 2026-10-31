@@ -1,0 +1,5 @@
+id: sliding-lid-box
+prompt: "A small box about 50 mm on each side with a sliding lid, printed as two parts."
+expect:
+  largest_mm: {min: 45, max: 60}
+  single_body: false

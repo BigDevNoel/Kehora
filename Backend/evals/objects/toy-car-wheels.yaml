@@ -1,0 +1,5 @@
+id: toy-car-wheels
+prompt: "A set of four toy car wheels 30 mm in diameter with 3 mm axle holes, laid flat."
+expect:
+  largest_mm: {min: 60, max: 140}
+  single_body: false

@@ -1,0 +1,4 @@
+id: cabinet-knob
+prompt: "A round cabinet knob 30 mm in diameter with a hole in the back for an M4 screw."
+expect:
+  largest_mm: {min: 25, max: 35}

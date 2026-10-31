@@ -1,0 +1,4 @@
+id: router-wall-mount
+prompt: "A wall bracket for a Wi-Fi router 150 mm wide and 30 mm thick."
+expect:
+  largest_mm: {min: 60, max: 200}

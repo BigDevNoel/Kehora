@@ -1,0 +1,4 @@
+id: screwdriver-rack
+prompt: "A wall rack that holds six screwdrivers with shafts up to 8 mm thick."
+expect:
+  largest_mm: {min: 120, max: 250}

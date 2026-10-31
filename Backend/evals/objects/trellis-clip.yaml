@@ -1,0 +1,5 @@
+id: trellis-clip
+prompt: "A clip that holds a 6 mm plant stem to an 8 mm bamboo stake."
+material: petg
+expect:
+  largest_mm: {min: 10, max: 40}

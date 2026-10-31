@@ -1,0 +1,4 @@
+id: peg-game-board
+prompt: "A peg game board 120 mm square with a 6 x 6 grid of 5 mm holes."
+expect:
+  exact_size: {dims_mm: [120, 120], tolerance_mm: 0.1}

@@ -1,0 +1,5 @@
+id: pegboard-hook
+prompt: "A single hook for a standard 1/4 inch pegboard with holes on a 25.4 mm grid, printable without supports."
+expect:
+  largest_mm: {min: 30, max: 100}
+  supports_allowed: false

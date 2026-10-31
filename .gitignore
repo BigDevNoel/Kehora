@@ -36,3 +36,6 @@ Thumbs.db
 .terraform/
 *.tfstate
 *.tfstate.*
+
+# Eval run output
+Backend/evals/results/

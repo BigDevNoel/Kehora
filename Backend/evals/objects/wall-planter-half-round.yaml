@@ -1,0 +1,5 @@
+id: wall-planter-half-round
+prompt: "A wall-mounted half-round planter with a keyhole slot for hanging."
+category: hybrid
+expect:
+  largest_mm: {min: 80, max: 200}

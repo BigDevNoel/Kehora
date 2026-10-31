@@ -1,0 +1,5 @@
+id: calibration-cube
+prompt: "A calibration cube exactly 20 mm on each side."
+printer: bambu-a1-mini
+expect:
+  exact_size: {dims_mm: [20, 20, 20], tolerance_mm: 0.1}

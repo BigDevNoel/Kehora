@@ -1,0 +1,4 @@
+id: drawer-divider-clip
+prompt: "A clip that joins two 3 mm thick drawer divider panels at a right angle."
+expect:
+  largest_mm: {min: 15, max: 60}

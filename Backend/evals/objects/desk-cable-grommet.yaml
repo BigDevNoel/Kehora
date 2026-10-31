@@ -1,0 +1,5 @@
+id: desk-cable-grommet
+prompt: "A desk cable grommet that fits a 60 mm hole, with a removable cap that has a cable slot."
+expect:
+  largest_mm: {min: 60, max: 80}
+  single_body: false

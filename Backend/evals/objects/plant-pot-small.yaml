@@ -1,0 +1,4 @@
+id: plant-pot-small
+prompt: "A small plant pot 90 mm across and 80 mm tall with a drainage hole."
+expect:
+  exact_size: {dims_mm: [90, 90, 80], tolerance_mm: 0.5}

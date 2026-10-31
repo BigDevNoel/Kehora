@@ -1,0 +1,5 @@
+id: owl-planter
+prompt: "A small owl-shaped planter with a drainage hole."
+category: hybrid
+expect:
+  largest_mm: {min: 60, max: 140}

@@ -1,0 +1,4 @@
+id: remote-control-holder
+prompt: "A holder that keeps three TV remotes standing upright."
+expect:
+  largest_mm: {min: 80, max: 200}

@@ -1,0 +1,4 @@
+id: star-ornament
+prompt: "A five-pointed star Christmas ornament 70 mm across with a hanging loop."
+expect:
+  largest_mm: {min: 65, max: 90}

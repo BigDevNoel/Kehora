@@ -1,0 +1,4 @@
+id: fruit-bowl
+prompt: "A shallow fruit bowl 200 mm across and 60 mm tall."
+expect:
+  exact_size: {dims_mm: [200, 200, 60], tolerance_mm: 1}

@@ -1,6 +1,6 @@
-# CLAUDE.md — Forge (AI Hardware Studio)
+# CLAUDE.md — Kehora (AI Hardware Studio)
 
-Forge turns a plain-language description into a designed, verified and manufacturable physical product:
+Kehora turns a plain-language description into a designed, verified and manufacturable physical product:
 3D-printable objects, electronics (circuit, PCB, firmware), enclosures, laser/CNC parts and companion apps.
 The full product spec is in `docs/PRD.md`. Read the relevant PRD section before starting any feature.
 
@@ -67,8 +67,8 @@ enqueue │  │ progress events (Redis → SSE)
 ## Repo layout
 
 Two top-level folders. All frontend work happens in `Frontend/`, all backend work in `Backend/`.
-Only these files and folders sit at the root: `CLAUDE.md`, `docs/`, `Makefile`, `docker-compose.yml`,
-`.github/`, `.gitignore`, `.env.example`.
+Only these files and folders sit at the root: `README.md`, `CLAUDE.md`, `docs/`, `Makefile`,
+`docker-compose.yml`, `.github/`, `.gitignore`, `.env.example`.
 
 ```
 Frontend/                   pnpm workspace (TypeScript)

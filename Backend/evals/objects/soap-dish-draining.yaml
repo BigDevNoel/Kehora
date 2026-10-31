@@ -1,0 +1,4 @@
+id: soap-dish-draining
+prompt: "A soap dish 110 x 80 mm with drainage slots and raised ribs to keep the soap dry."
+expect:
+  exact_size: {dims_mm: [110, 80], tolerance_mm: 0.1}

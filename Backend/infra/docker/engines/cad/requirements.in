@@ -1,0 +1,5 @@
+# CAD engine sandbox image (ADR-0010). Compile with:
+#   uv pip compile infra/docker/engines/cad/requirements.in --python-version 3.12 \
+#     --python-platform x86_64-manylinux_2_28 --generate-hashes -o infra/docker/engines/cad/requirements.txt
+build123d==0.13.0
+trimesh==5.1.1
